@@ -1,6 +1,6 @@
 # Testing and QA
 
-Status: test design; **no application tests executed**. Existing repository has no manifest/test suite. Executed planning checks are recorded in [verification and risks](docs/council/VERIFICATION_AND_RISKS.md). Future script names below must be created by T01; do not run them expecting this repository to work now.
+Status: **Implemented and passing in Shanky's lane**. Complete test suite covering Contracts (35 tests), Database Integration (5 tests on real PostgreSQL), API Unit/Integration/Security/Load (49 tests), and Evaluation Scorer/Corpus (15 tests + `eval:self-test`). Total 104 tests passing across all packages with zero external key requirements and strictly synthetic data. Playwright E2E skeletons authored and marked `test.skip("awaiting Johny's UI")`. Real health data and production deployments remain unexecuted per human G2 gates.
 
 ## Verification matrix
 

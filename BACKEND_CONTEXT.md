@@ -1,6 +1,6 @@
 # Backend context
 
-Existing backend: **none**. No Node manifest, route, database, worker or deployed service exists. Planned design follows [R2](docs/council/PROPOSAL_R2.md); actual approval is recorded separately.
+Status: **Implemented in Shanky's lane**. Backend packages and services are operational and fully tested. Data access strictly mediated via `packages/db` repositories; only `packages/db` imports Prisma. Domain logic (`apps/api/src/domain/visits.ts`) orchestrates atomic database transitions and generates structured audit logs without logging sensitive patient observations or transcripts. Johny's lane integrates the HTTP server entrypoint (`server.ts`), speech providers (`providers/`), media staging (`media/`), and UI (`apps/web/`).
 
 ## Proposed modules
 

@@ -1,6 +1,6 @@
 # Database design
 
-Status: logical proposed schema, **no database or migrations created/executed**. Target PostgreSQL with Prisma ORM. No existing records to migrate. Synthetic-only scope and human approval gates apply.
+Status: **Implemented in Shanky's lane**. PostgreSQL 16 schema deployed via Prisma 7.10.1 (`packages/db/prisma/migrations/0001_initial/migration.sql`) with `@prisma/adapter-pg`. Disposable test database runs on `localhost:54320` via `packages/db/docker-compose.test.yml`. SQL immutability triggers (`check_visit_revision_immutable`, `forbid_transition_audit_mutation`) and CHECK constraints (`visit_state_check`, `visit_current_revision_check`, `actor_role_check`) enforced directly by PostgreSQL. Idempotent seed in `packages/db/prisma/seed.ts` populates synthetic actors, beneficiaries, assignments, and historical visits. Evaluation tables (`evaluation_run`, `evaluation_result`) are isolated with zero foreign keys to clinical tables. Production deployment and real health data remain subject to human G2 authorization.
 
 ```mermaid
 erDiagram

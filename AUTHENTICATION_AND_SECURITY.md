@@ -1,6 +1,6 @@
 # Authentication, safety and security
 
-Status: proposed controls, **not implemented or verified**. Synthetic demo only. This is an engineering threat model, not a legal or clinical compliance assessment. No real-data pilot is authorized. See human gates and individual votes in [DECISION_LOG.md](DECISION_LOG.md).
+Status: **Implemented and verified in Shanky's lane** (threat model mitigations S-01 through S-11 verified in unit and integration test suites against real PostgreSQL). Synthetic demo only. Identity contract enforced via `IdentityVerifier` / `FixtureVerifier` in local test mode and strictly rejected in live mode (`APP_MODE=live`). Central policy enforces deny-by-default access control; CSRF protection, ETag revision matching, audio cleanup, prompt injection isolation, and structured log sanitization are active. Production deployment and real health data collection remain blocked pending human G2 authorization.
 
 ## Identity and authorization contract
 

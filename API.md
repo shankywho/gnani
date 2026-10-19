@@ -1,6 +1,6 @@
 # API contracts
 
-Status: planned `/api/v1` contracts; **no routes implemented**. JSON responses except bounded multipart audio. Backend derives actor/role from verified session; never trusts request role or organization. Cookie sessions need CSRF and strict origin checks. [Database semantics](DATABASE.md) and [security](AUTHENTICATION_AND_SECURITY.md) apply to every operation.
+Status: **Implemented in Shanky's lane**. All `/api/v1` routes implemented across `apps/api/src/routes/` (`session.ts`, `beneficiaries.ts`, `visits.ts`, `reviews.ts`, `extractions.ts`). Backend strictly derives actor/role from verified session / identity verifier; never trusts client-supplied role or organization. Mutations require CSRF protection when session-authenticated and enforce `If-Match` ETags (`"visit:<id>:<revision>"`). Idempotency keys enforced on `POST /visits`, `POST /visits/:id/submit`, and `POST /visits/:id/reviews`. Consistent error envelopes `{ "error": { "code", "message" }, "requestId" }` implemented across all error status codes.
 
 ## Common behavior
 

@@ -1,6 +1,6 @@
 # Integration contracts
 
-Status: planned adapters; no authenticated vendor call executed in this council. Documentation checks are indexed in [source verification](docs/source/VERIFICATION.md), retrieved 2026-10-19. Verify actual account access, price and formats at T02 before treating any contract as tested.
+Status: **Implemented seams and contracts in Shanky's lane**. Application seams (`TranscribeClip`, `StageClip`, `IdentityVerifier`, `ExtractionProvider`) compiled and fully tested in `packages/contracts/src/seams.ts` and `apps/api/src/extraction/`. Guaranteed cleanup on success or error verified in integration tests. Zero paid API calls and zero cloud keys executed in Shanky's lane; Johny's lane implements concrete Gnani network adapters (`apps/api/src/providers/`) and media transcoding (`apps/api/src/media/`).
 
 ## Provider boundary
 

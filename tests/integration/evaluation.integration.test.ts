@@ -11,6 +11,8 @@ import {
 } from "@sakhiline/db";
 import { createTestApp } from "../helpers/testApp.js";
 
+import { randomUUID } from "node:crypto";
+
 describe("Phase 7 Integration: Evaluation Persistence & Table Isolation (Integration #10)", () => {
   let prisma: PrismaClient;
   let app: any;
@@ -33,7 +35,7 @@ describe("Phase 7 Integration: Evaluation Persistence & Table Isolation (Integra
     const initialBeneficiaryCount = await prisma.beneficiary.count();
 
     // 2. Persist an evaluation run via evaluation repository
-    const runId = "00000000-0000-0000-0000-000000000999";
+    const runId = randomUUID();
     const manifestHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
     const run = await createEvaluationRun(prisma, {

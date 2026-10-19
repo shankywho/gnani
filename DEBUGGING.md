@@ -1,6 +1,6 @@
 # Debugging guide
 
-Status: planned app runbook; no running SakhiLine service exists. October/Claude account tooling is separate from this application's Gnani/extraction integration. Do not alter IDE credentials or billing to fix a future application bug without evidence and user authorization.
+Status: **Updated with implemented backend runbook in Shanky's lane**. Backend services, database migrations, and evaluation runners are operational locally. Test database runs on PostgreSQL 16 at `localhost:54320` (`packages/db/docker-compose.test.yml`). Production deployment, real-data pipelines, and paid cloud keys remain gated.
 
 ## Reproduction and evidence
 
