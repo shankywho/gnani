@@ -14,8 +14,14 @@ import {
   editDraft as repoEditDraft,
   confirmRevision as repoConfirmRevision,
   submitVisit as repoSubmitVisit,
+  reviewVisit as repoReviewVisit,
+  reopenReturnedVisit as repoReopenReturnedVisit,
 } from "@sakhiline/db";
-import { assertWorkerBeneficiary, assertWorkerVisit } from "../policy/assignments.js";
+import {
+  assertWorkerBeneficiary,
+  assertWorkerVisit,
+  assertSupervisorVisit,
+} from "../policy/assignments.js";
 import { createHash } from "node:crypto";
 
 export interface DomainVisitDeps {
@@ -247,4 +253,113 @@ export async function submitVisit(
   });
 
   return res;
+}
+
+export async function reviewVisit(
+  deps: DomainVisitDeps,
+  params: {
+    actor: Actor;
+    visitId: string;
+    expectedRevision: number;
+    action: "approve" | "return";
+    reason?: string;
+    idempotencyKey: string;
+    requestBody: unknown;
+    ctx: RequestContext;
+  }
+) {
+  const start = Date.now();
+  await assertSupervisorVisit(deps.prisma, {
+    organizationId: params.actor.organizationId,
+    supervisorId: params.actor.id,
+    visitId: params.visitId,
+  });
+
+  const requestHash = createHash("sha256")
+    .update(JSON.stringify(params.requestBody))
+    .digest("hex");
+
+  const res = await repoReviewVisit(deps.prisma, {
+    organizationId: params.actor.organizationId,
+    supervisorId: params.actor.id,
+    visitId: params.visitId,
+    revision: params.expectedRevision,
+    action: params.action,
+    reason: params.reason,
+    idempotencyKey: params.idempotencyKey,
+    requestHash,
+    requestId: params.ctx.requestId,
+  });
+
+  const toState = params.action === "approve" ? "approved" : "returned";
+  params.ctx.log.info({
+    op: "reviewVisit",
+    actorRole: params.actor.role,
+    visitId: params.visitId,
+    fromState: "submitted",
+    toState,
+    revision: params.expectedRevision,
+    durationMs: Date.now() - start,
+  });
+
+  return res;
+}
+
+export async function reopenVisit(
+  deps: DomainVisitDeps,
+  params: {
+    actor: Actor;
+    visitId: string;
+    expectedRevision: number;
+    ctx: RequestContext;
+  }
+) {
+  const start = Date.now();
+  await assertWorkerVisit(deps.prisma, {
+    organizationId: params.actor.organizationId,
+    workerId: params.actor.id,
+    visitId: params.visitId,
+  });
+
+  const res = await repoReopenReturnedVisit(deps.prisma, {
+    organizationId: params.actor.organizationId,
+    workerId: params.actor.id,
+    visitId: params.visitId,
+    expectedRevision: params.expectedRevision,
+    requestId: params.ctx.requestId,
+  });
+
+  params.ctx.log.info({
+    op: "reopenVisit",
+    actorRole: params.actor.role,
+    visitId: params.visitId,
+    fromState: "returned",
+    toState: "draft",
+    revision: res.visit.currentRevision,
+    durationMs: Date.now() - start,
+  });
+
+  return res;
+}
+
+export async function readbackVisit(
+  deps: DomainVisitDeps,
+  params: {
+    actor: Actor;
+    visitId: string;
+  }
+) {
+  const visit = await getVisit(deps, { actor: params.actor, visitId: params.visitId });
+  if (!visit.currentRevisionData) {
+    throw new AppError("NOT_FOUND", "Revision not found");
+  }
+
+  // Must have a confirmed revision or approved state
+  if (!visit.confirmedRevision && visit.state !== "approved") {
+    throw new AppError("VALIDATION", "Read-back is available only for confirmed revisions");
+  }
+
+  const { generateReadback } = await import("../extraction/readback.js");
+  const text = generateReadback(visit.currentRevisionData.observations as unknown as Observations);
+  return { readbackText: text };
 }

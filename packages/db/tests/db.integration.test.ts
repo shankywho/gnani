@@ -46,7 +46,19 @@ describe("Database Integration Tests (Real Postgres)", () => {
     expect(benCount1).toBe(8);
     expect(actorCount1).toBe(4);
     expect(assignCount1).toBe(8);
-    expect(visitCount1).toBe(3);
+
+    const seededVisits = await prisma.visit.count({
+      where: {
+        id: {
+          in: [
+            "00000000-0000-0000-0000-000000001001",
+            "00000000-0000-0000-0000-000000001002",
+            "00000000-0000-0000-0000-000000001003",
+          ],
+        },
+      },
+    });
+    expect(seededVisits).toBe(3);
   });
 
   it("Integration #4: Raw-SQL UPDATE of visit_revision content is blocked by trigger", async () => {

@@ -573,7 +573,7 @@ export async function reviewVisit(
     }
 
     if (visit.state !== "submitted") {
-      throw new AppError("VALIDATION", "Visit is not pending review");
+      throw new AppError("STALE_REVISION", "Visit is no longer pending review");
     }
 
     if (visit.currentRevision !== params.revision) {

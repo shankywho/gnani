@@ -16,6 +16,8 @@ import {
   editDraft,
   confirmRevision,
   submitVisit,
+  reopenVisit,
+  readbackVisit,
   parseETag,
   makeETag,
 } from "../domain/visits.js";
@@ -178,6 +180,82 @@ export function createVisitsRouter(deps: {
         visitId,
         expectedRevision,
         data,
+        idempotencyKey,
+        requestBody: req.body,
+        ctx: req.requestContext!,
+      });
+
+      if (result.isReplay) {
+        res.setHeader("Idempotent-Replay", "true");
+      }
+
+      const etag = makeETag(result.visit.id, result.visit.currentRevision);
+      res.setHeader("ETag", etag);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // POST /visits/:id/reopen
+  router.post("/:id/reopen", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      assertRole(req.actor, "worker");
+      const visitId = req.params.id as string;
+      const expectedRevision = requireIfMatch(req);
+
+      const result = await reopenVisit(deps, {
+        actor: req.actor,
+        visitId,
+        expectedRevision,
+        ctx: req.requestContext!,
+      });
+
+      const etag = makeETag(result.visit.id, result.visit.currentRevision);
+      res.setHeader("ETag", etag);
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // POST /visits/:id/readback
+  router.post("/:id/readback", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.actor) {
+        throw new AppError("UNAUTHENTICATED", "Authentication required");
+      }
+      const visitId = req.params.id as string;
+
+      const result = await readbackVisit(deps, {
+        actor: req.actor,
+        visitId,
+      });
+
+      res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // POST /visits/:id/reviews
+  router.post("/:id/reviews", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      assertRole(req.actor, "supervisor");
+      const visitId = req.params.id as string;
+      const expectedRevision = requireIfMatch(req);
+      const idempotencyKey = requireIdempotencyKey(req);
+
+      const { ReviewRequest } = await import("@sakhiline/contracts");
+      const data = ReviewRequest.parse(req.body);
+
+      const { reviewVisit } = await import("../domain/visits.js");
+      const result = await reviewVisit(deps, {
+        actor: req.actor,
+        visitId,
+        expectedRevision,
+        action: data.action,
+        reason: data.action === "return" ? data.reason : undefined,
         idempotencyKey,
         requestBody: req.body,
         ctx: req.requestContext!,
