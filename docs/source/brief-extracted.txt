@@ -1,0 +1,390 @@
+
+--- PAGE 1 ---
+SakhiLine — Project Brief & Architecture
+​Oct 18, 2026 · ​@shankar
+SakhiLine is a voice assistant for ASHA health workers, built for Gnani AI's Great Indian AI
+Internship Challenge, with submissions due ​Nov 10, 2026 .
+What we're building
+An ASHA worker taps one button after a home visit and talks; SakhiLine fills the visit form,
+she confirms it, and it goes to her supervisor for approval.
+She speaks the way she naturally does, in her own language mixed with English medical
+terms: "Sunita ka BP check kiya, Hb 9 tha, TT ka doosra injection due hai agle hafte." Before
+she starts, the assistant pulls the beneficiary's history, so she only adds what is new.
+The assistant works through three channels, one per network situation:
+Two more pieces complete the product:
+Supervisor review. Submitted records land in an approval queue for her ANM or block
+health officer, who approves them or sends comments back.
+Built-in stress tester. SakhiLine generates hundreds of synthetic noisy calls, runs them
+through its own pipeline, and publishes accuracy by language and noise level. Every
+accuracy claim in the demo comes with a measured number.
+Why we're building it
+ASHA workers lose hours to paperwork after every round of home visits, and voice
+removes most of it.
+Channel
+When it is used
+What she gets
+App, live push-to-talk
+Mobile data works
+Form fills on screen as she speaks; she
+taps any field to fix it
+App, record and sync
+later
+Weak or no data, not
+urgent
+Recording queued on the phone,
+processed when the signal returns, draft
+sent back for her to confirm
+Phone call
+No data, urgent
+Voice-only flow over a normal call, with a
+spoken read-back to confirm
+SakhiLine — Project Brief & Architecture
+Page 1 of 9
+
+
+--- PAGE 2 ---
+The problem. After visits, ASHAs fill registers and apps by hand, often in English-heavy
+forms, then chase supervisors and mothers separately. Data entry competes with the
+visits themselves.
+The users. ASHA workers (primary), their supervisors such as the ANM or block health
+officer (reviewers). Rural health workers are named in the contest's Real Deal award
+brief.
+Why voice. ASHAs already describe visits out loud, in their own language, mixing in
+English medical terms. Speaking is faster than typing on a phone and works for
+workers less comfortable with English forms.
+Why Gnani. Gnani's models are trained on Indian telephonic audio, code-mixed speech
+and Indian languages. That is exactly this user's input: noisy, multilingual, often over a
+weak phone line.
+Why it wins the contest. It is easy to explain in a 60-second video, emotional enough to
+be shared, and backed by measured accuracy numbers instead of claims.
+Constraints
+The hardest constraints are the 23-day window, synthetic-data-only rules, and Evon not
+being on Gnani's API.
+Constraint
+Detail
+What it means for us
+Deadline
+Submissions close 11:59 PM IST, Nov 10,
+2026
+About 23 days of build time
+from Oct 18
+Team
+Exactly two people
+Clear ownership split; each
+member's contribution is
+written into the submission
+Gnani tech
+Must use at least one Gnani model or API,
+named in the submission
+Prisma and Timbre are core;
+Evon is used offline
+Evon access
+Not on the API platform; open weights by
+request on Hugging Face
+Self-host on a rented GPU,
+used only for offline batch
+jobs
+Credits
+5,000 programme credits per registration
+Track usage; do not load-
+test the live APIs on credits
+Synthetic data
+No real phone numbers, records,
+Aadhaar, PAN or recorded calls in the
+project or demo
+All beneficiaries, readings
+and calls are invented, and
+the demo says so
+SakhiLine — Project Brief & Architecture
+Page 2 of 9
+
+
+--- PAGE 3 ---
+Architecture
+The app, the phone call and the synthetic test traffic all enter one voice gateway, so the
+Prisma → dialogue engine → Timbre pipeline is built and tested once.
+Constraint
+Detail
+What it means for us
+Agent builder
+Out of scope; only the API platform
+counts
+We build our own gateway
+and orchestration
+Public demo
+Post on LinkedIn and/or X with #GnaniAI
+and #GreatIndianAIInternshipChallenge
+before submitting
+Shortlisting is ranked by
+verified engagement, so the
+post must go live early
+Authentic
+engagement
+No bought engagement, bots, pods or
+engagement swaps
+Growth comes only from
+genuine reshares
+Medical safety
+— (our own rule)
+SakhiLine logs and reminds;
+it never diagnoses or
+recommends treatment
+Network
+Rural data coverage is patchy
+Offline queue and call
+fallback are part of the
+design, not extras
+SakhiLine — Project Brief & Architecture
+Page 3 of 9
+
+
+--- PAGE 4 ---
+Evon feeds the synthetic callers and the evaluator offline; confirmed records land in
+Postgres and surface on the supervisor dashboard.
+How data flows
+Every input, real or synthetic, enters through one voice gateway, so all five flows share the
+same pipeline after it.
+1. Live app (primary)
+1. She taps the button and names the beneficiary. The app fetches the beneficiary's
+history from the backend and shows it.
+2. The app streams 16kHz microphone audio over a WebSocket to the voice gateway.
+3. The gateway streams it into Prisma; partial transcripts appear on screen as she speaks.
+4. The dialogue engine (an LLM with function calling) turns the transcript into form fields,
+validated against a strict schema (Zod). Missing or unclear fields get a follow-up
+question, never a guess.
+SakhiLine architecture · 3 inputs, 1 gateway, shared pipeline
+SakhiLine — Project Brief & Architecture
+Page 4 of 9
+
+
+--- PAGE 5 ---
+5. Fields fill on screen live. Timbre speaks short prompts or the read-back if she wants
+audio.
+6. She confirms or taps to fix a field, then submits. The record goes to Postgres with
+status pending review.
+Target: under about 1.2 seconds from when she stops talking to the next prompt, which
+needs streaming at every stage.
+2. Offline record and sync
+1. With weak or no data, the app records audio locally and queues it in the phone's
+browser storage.
+2. When the signal returns, the app uploads the queued recordings.
+3. A sync worker runs each one through the same pipeline as a batch job.
+4. The draft form comes back to the app; she reviews, fixes and submits as in flow 1.
+3. Phone-call fallback
+1. She calls a number. The telephony provider (Exotel or Twilio) streams 8kHz call audio to
+the gateway.
+2. Same Prisma → engine → Timbre loop, voice-only, with a spoken read-back: "Sunita, Hb
+9, TT second dose next Tuesday — sahi hai?"
+3. On confirmation the record is saved as pending review, and she can check it in the app
+later.
+4. Supervisor review
+1. Submitted records appear in the supervisor's approval queue on the dashboard.
+2. Rule-based flags, with thresholds set by the health department, push certain records
+to the top of the queue. The AI never decides what is risky.
+3. The supervisor approves, or sends a comment back to the ASHA, who fixes and
+resubmits.
+5. Stress test (the twist)
+1. Evon, self-hosted and offline, writes hundreds of synthetic visit scenarios: a spoken
+script per scenario plus the correct record as ground-truth JSON.
+2. Timbre voices each script as an ASHA.
+3. A noise degrader adds village noise, downsamples to 8kHz, applies phone-codec
+compression and drops packets, at controlled levels.
+SakhiLine — Project Brief & Architecture
+Page 5 of 9
+
+
+--- PAGE 6 ---
+4. The audio enters the same gateway as real traffic, through a simulated-caller
+WebSocket.
+5. The evaluator compares each extracted record with its ground truth field by field and
+reports accuracy by language, code-mixing level and noise level, plus latency
+percentiles.
+Where the Gnani models are used
+All three Gnani models have a real job: Prisma hears, Timbre speaks and generates test
+voices, and Evon writes the test scenarios offline.
+The real-time conversation logic runs on whichever hosted LLM is fastest, because Evon is
+not on Gnani's API and self-hosting it for live calls would add latency and GPU cost.
+The stress test uses Gnani's text-to-speech to generate test data for Gnani's speech-to-
+text, so the system measures itself. That is the Jugaad Genius angle and the strongest
+interview talking point.
+Model
+What it is
+Where SakhiLine uses it
+Mode
+Prisma
+v2.5
+Speech-to-text, trained
+on Indian telephonic
+audio, code-mixed speech
+Live app transcription
+(flow 1)
+Real-time streaming
+Phone-call fallback on 8kHz
+audio (flow 3)
+Real-time streaming
+Offline recordings
+uploaded later (flow 2)
+Batch
+Every stress-test call (flow
+5)
+Streaming, through
+the same gateway
+Timbre
+v2.5
+Text-to-speech for Indian
+languages, streams over
+WebSocket and SSE
+Read-backs and prompts in
+the app and on calls
+Real-time streaming
+Voicing synthetic ASHA
+callers for the stress test
+Batch
+Evon
+v3.3
+30B mixture-of-experts
+LLM, open weights
+Writing synthetic visit
+scenarios and ground-
+truth records
+Offline batch, self-
+hosted
+Judging free-text fields
+during evaluation
+Offline batch, self-
+hosted
+SakhiLine — Project Brief & Architecture
+Page 6 of 9
+
+
+--- PAGE 7 ---
+Tech stack
+The backend stays on the team's existing Node.js and TypeScript stack; only the audio
+work and Evon hosting add Python.
+Award mapping
+SakhiLine is in contention for 8 of the 10 awards, but a team can win only one, so Real Deal
+and Noise Canceller are the primary targets.
+Layer
+Choice
+Why
+ASHA app
+React PWA (installable on
+Android), push-to-talk over
+WebSocket, browser storage for
+the offline queue
+One codebase, no app-store step,
+works offline
+Supervisor
+dashboard
+React
+Same frontend stack as the app
+Voice gateway
+Node.js + TypeScript WebSocket
+server; voice-activity detection,
+barge-in, audio conversion
+One entry point for app, call and
+test traffic
+Dialogue engine
+Node.js + TypeScript; hosted LLM
+with function calling; Zod
+schemas
+Strict, validated form filling
+Data
+PostgreSQL + Prisma ORM
+Beneficiaries, visits, review status
+Jobs
+Redis + BullMQ
+Offline sync jobs, reminder calls,
+stress-test runs
+Telephony
+Exotel or Twilio media streams
+Call fallback
+Noise degrader
+Python worker (numpy, librosa or
+ffmpeg)
+Noise mixing, 8kHz downsampling,
+codec, packet loss
+Evon hosting
+vLLM on a rented GPU, switched
+on only for batch runs
+Keeps GPU cost to the hours we
+use it
+Evaluator
+Node.js or Python job writing
+results to Postgres
+Accuracy charts on the dashboard
+SakhiLine — Project Brief & Architecture
+Page 7 of 9
+
+
+--- PAGE 8 ---
+Scope and open questions
+The full design is too much for two people in 23 days, so build in this order and cut from
+the bottom.
+Must ship
+Should ship
+Nice to have
+Award
+Feature that earns it
+Priority
+Real Deal
+Rural health workers are named in the brief;
+visible time saved per ASHA
+Primary
+Noise Canceller
+Measured accuracy on noisy, phone-degraded
+audio from the stress test
+Primary
+Main Character
+Full flow in one regional language that Prisma and
+Timbre support
+Secondary
+Mixed Vibes
+ASHAs mix their language with English medical
+terms (BP, Hb, TT)
+Secondary
+Jugaad Genius
+Gnani's text-to-speech generating test data for
+Gnani's speech-to-text
+Secondary
+Two-Person Army
+Clean two-person split, recorded in the
+submission
+Automatic
+entry
+Demo Day Drop
+60-second video: village, voice, form fills,
+supervisor approves, accuracy chart
+Secondary
+Crowd Favourite
+Shareable, emotional story; same engagement
+that drives shortlisting
+Secondary
+Solo Ninja
+Not eligible; we are a team of two
+—
+Small Town, Big
+Build
+Depends on whether our college or city is Tier 2/3
+Check
+App with live push-to-talk, beneficiary history fetch, and live form filling
+Supervisor approval queue on the dashboard
+Stress-test harness and the accuracy-by-noise-level chart
+60-second demo video, and the LinkedIn/X post live well before Nov 10
+Phone-call fallback (keeps the Noise Canceller story)
+SakhiLine — Project Brief & Architecture
+Page 8 of 9
+
+
+--- PAGE 9 ---
+Verify in Gnani's docs before writing code
+Offline record-and-sync
+Rule-based supervisor flags
+Outbound reminder calls to mothers (otherwise shown as a roadmap item)
+Audio format Prisma's streaming endpoint expects (sample rate, encoding)
+Timbre's output audio format and streaming behaviour
+Which languages Prisma and Timbre each support, to pick the regional language
+Whether Prisma has a batch endpoint for the offline sync path
+How far 5,000 credits go for streaming STT and TTS
+SakhiLine — Project Brief & Architecture
+Page 9 of 9
