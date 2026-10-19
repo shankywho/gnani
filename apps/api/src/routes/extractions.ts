@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { PrismaClient } from "@sakhiline/db";
+import { PrismaClient, listHistoricalVisits } from "@sakhiline/db";
 import {
   TranscribeClip,
   StageClip,
@@ -98,7 +98,18 @@ export function createExtractionsRouter(deps: {
 
       // 3. Extract observations from transcript
       const currentRev = visit.currentRevisionData;
+      // Prior approved readings go in labelled as OLD so the extractor can refuse to copy them.
+      const past = await listHistoricalVisits(deps.prisma, {
+        organizationId: req.actor.organizationId,
+        workerId: req.actor.id,
+        beneficiaryId: visit.beneficiaryId,
+        limit: 5,
+      });
+      const history = past.visits
+        .filter((v) => v.observations)
+        .map((v) => ({ observations: v.observations as any }));
       const proposal = await deps.extraction.extract({
+        history,
         baseRevision: visit.currentRevision,
         transcript: sttResult.transcript,
         visitAt: currentRev?.visitAt.toISOString() || new Date().toISOString(),

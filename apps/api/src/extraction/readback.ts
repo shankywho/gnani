@@ -24,7 +24,8 @@ export function generateReadback(obs: Observations): string {
 
   // TT Dose
   if (obs.ttDose.status === "recorded") {
-    parts.push(`TT dose: ${obs.ttDose.text}.`);
+    // Free transcript text is never read back (advice-injection channel); only the fact it was mentioned.
+    parts.push("TT dose mentioned.");
   } else if (obs.ttDose.status === "not_measured") {
     notMeasuredFields.push("TT dose");
   }

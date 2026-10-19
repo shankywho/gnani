@@ -1,4 +1,5 @@
 import { PrismaClient, Visit, VisitRevision, Prisma } from "@prisma/client";
+import { findPage } from "./beneficiaries.js";
 import {
   AppError,
   RevisionContent,
@@ -112,29 +113,45 @@ export async function listHistoricalVisits(
     throw new AppError("NOT_FOUND", "Beneficiary not found or not assigned");
   }
 
-  const visits = await prisma.visit.findMany({
-    where: {
-      organizationId: scope.organizationId,
-      beneficiaryId: scope.beneficiaryId,
-      state: "approved",
-    },
-    include: {
-      revisions: {
-        orderBy: { revision: "desc" },
-        take: 1,
+  if (scope.cursor) {
+    const ok = await prisma.visit.count({
+      where: { id: scope.cursor, organizationId: scope.organizationId, beneficiaryId: scope.beneficiaryId, state: "approved" },
+    });
+    if (!ok) throw new AppError("VALIDATION", "Invalid cursor");
+  }
+
+  const visits = await findPage(() =>
+    prisma.visit.findMany({
+      where: {
+        organizationId: scope.organizationId,
+        beneficiaryId: scope.beneficiaryId,
+        state: "approved",
       },
-    },
-    orderBy: { createdAt: "desc" },
-    take: limit + 1,
-    cursor: scope.cursor ? { id: scope.cursor } : undefined,
-  });
+      include: {
+        revisions: {
+          orderBy: { revision: "desc" },
+          take: 1,
+        },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      take: limit + 1,
+      ...(scope.cursor ? { cursor: { id: scope.cursor }, skip: 1 } : {}),
+    })
+  );
 
   const hasMore = visits.length > limit;
   const sliced = hasMore ? visits.slice(0, limit) : visits;
   const nextCursor = hasMore ? sliced[sliced.length - 1]?.id : undefined;
 
+  // History is labelled old and carries typed observations only: no transcript or free-text note.
   return {
-    visits: sliced,
+    visits: sliced.map((v) => ({
+      id: v.id,
+      label: "previous_visit" as const,
+      visitAt: v.revisions[0]?.visitAt ?? null,
+      visitTimezone: v.revisions[0]?.visitTimezone ?? null,
+      observations: (v.revisions[0]?.observations ?? null) as unknown,
+    })),
     nextCursor,
   };
 }
@@ -150,23 +167,32 @@ export async function listPendingReviews(
 ) {
   const limit = Math.min(Math.max(scope.limit || 50, 1), 50);
 
-  const visits = await prisma.visit.findMany({
-    where: {
-      organizationId: scope.organizationId,
-      supervisorId: scope.supervisorId,
-      state: "submitted",
-    },
-    include: {
-      revisions: {
-        orderBy: { revision: "desc" },
-        take: 1,
+  if (scope.cursor) {
+    const ok = await prisma.visit.count({
+      where: { id: scope.cursor, organizationId: scope.organizationId, supervisorId: scope.supervisorId, state: "submitted" },
+    });
+    if (!ok) throw new AppError("VALIDATION", "Invalid cursor");
+  }
+
+  const visits = await findPage(() =>
+    prisma.visit.findMany({
+      where: {
+        organizationId: scope.organizationId,
+        supervisorId: scope.supervisorId,
+        state: "submitted",
       },
-      beneficiary: true,
-    },
-    orderBy: { updatedAt: "desc" },
-    take: limit + 1,
-    cursor: scope.cursor ? { id: scope.cursor } : undefined,
-  });
+      include: {
+        revisions: {
+          orderBy: { revision: "desc" },
+          take: 1,
+        },
+        beneficiary: true,
+      },
+      orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+      take: limit + 1,
+      ...(scope.cursor ? { cursor: { id: scope.cursor }, skip: 1 } : {}),
+    })
+  );
 
   const hasMore = visits.length > limit;
   const sliced = hasMore ? visits.slice(0, limit) : visits;

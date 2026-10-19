@@ -4,9 +4,9 @@
 - **All 8 Phases Complete**:
   - `packages/contracts`: 35 tests green (`npm test`).
   - `packages/db`: 6 tests green on PostgreSQL 16 (`npm test`).
-  - `apps/api`: 58 tests green (`npm test`), including Integrations #1–#14, security suite, log-capture, and 250-concurrency load test.
-  - `eval`: 17 tests green (`npm test`, `npm run eval:self-test`), 30 scenarios with zero split leakage.
-  - Total: 116 tests passing across all packages.
+  - `apps/api`: 66 tests green (`npm test`), including Integrations #1–#14, security suite, log-capture, and 250-concurrency load test.
+  - `eval`: 18 tests green (`npm test`, `npm run eval:self-test`), 30 scenarios with zero split leakage.
+  - Total: 125 tests passing across all packages.
 - **Handoff Documentation**: `docs/workspace-requirements.md`, `docs/BUILD_SUMMARY_SHANKY.md`.
 - **E2E Specs**: `tests/e2e/worker.spec.ts`, `review.spec.ts` awaiting Johny's UI.
 
@@ -17,3 +17,4 @@
 
 ## Needs from Johny
 - Details indexed in `docs/workspace-requirements.md` and `docs/BUILD_SUMMARY_SHANKY.md`.
+- Johny: in `eval/src/run.ts` seed noise with `scenarioSeed(manifest.seed, scenario.id, condition)` from `eval/src/noise.ts`.

@@ -12,6 +12,23 @@ function getCodePointSpan(fullText: string, matchedSubstring: string): [number, 
   return [start, start + length];
 }
 
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+/**
+ * "27 October" -> ISO date. Year comes from the visit date; a month earlier than the visit
+ * month means next year. Impossible calendar dates return null (caller abstains).
+ */
+function resolveDayMonth(day: number, monthWord: string, visitAt: string): string | null {
+  const month = MONTHS.indexOf(monthWord.slice(0, 3).toLowerCase()) + 1;
+  const visit = /^(\d{4})-(\d{2})/.exec(visitAt);
+  if (!month || !visit) return null;
+  let year = Number(visit[1]);
+  if (month < Number(visit[2])) year += 1;
+  const d = new Date(Date.UTC(year, month - 1, day));
+  if (day < 1 || d.getUTCMonth() !== month - 1 || d.getUTCDate() !== day) return null;
+  return d.toISOString().slice(0, 10);
+}
+
 export class MockExtractionProvider implements ExtractionProvider {
   public readonly name = "regex-mock-v1";
   public readonly promptVersion = "2026-10-19";
@@ -51,15 +68,19 @@ export class MockExtractionProvider implements ExtractionProvider {
     } else {
       // Regex for BP matches: (\d{2,3})\s*(by|\/|ऊपर)\s*(\d{2,3})
       // If multiple pairs exist (e.g. correction "110 nahi, 120 by 80"), take the last match
-      const bpRegex = /(\d{2,3})\s*(?:by|\/|ऊपर)\s*(\d{2,3})/gi;
+      const bpRegex = /(?<![\d/.-])(\d{2,3})\s*(by|\/|ऊपर)\s*(\d{2,3})(?![\d/.-])/gi;
       const bpMatches = [...text.matchAll(bpRegex)];
       if (bpMatches.length > 0) {
         const lastMatch = bpMatches[bpMatches.length - 1];
         if (lastMatch) {
           const sys = parseInt(lastMatch[1]!, 10);
-          const dia = parseInt(lastMatch[2]!, 10);
+          const dia = parseInt(lastMatch[3]!, 10);
           const span = getCodePointSpan(text, lastMatch[0]!);
-          bpObservation = {
+          if (lastMatch[2] === "/" && sys <= 31 && dia <= 12) {
+            // "27/10" reads as a calendar date as easily as a BP pair: abstain, ask the worker.
+            bpObservation = { status: "unknown" };
+            issues.push({ field: "bloodPressure", code: "CONFLICTING_READING", clarificationKey: "ASK_BP_UNIT_OR_PAIR" });
+          } else bpObservation = {
             status: "recorded",
             systolic: sys,
             diastolic: dia,
@@ -103,13 +124,13 @@ export class MockExtractionProvider implements ExtractionProvider {
 
     // 3. TT Dose Mention
     let ttObservation: any = { status: "not_mentioned" };
-    if (/(?:TT|tt)\s*(?:nahi|nahin)/i.test(text)) {
+    if (/\bTT\b[^,.]{0,20}?\b(?:nahi|nahin)\b/i.test(text)) {
       ttObservation = { status: "not_measured" };
     } else {
-      const ttRegex = /(?:TT|tt)\s*(?:ka\s*)?(?:doosra|pehla|first|second|1st|2nd)?\s*(?:injection|dose|teeka)[^,.]*/gi;
+      const ttRegex = /(?:TT|tt)\s*(?:ka\s*)?(?:doosra|pehla|first|second|1st|2nd)?\s*(?:injection|dose|teeka)/gi;
       const ttMatch = text.match(ttRegex);
       if (ttMatch) {
-        const matchedStr = ttMatch[0]!.trim();
+        const matchedStr = [...ttMatch[0]!.trim()].slice(0, 120).join("").trim();
         const span = getCodePointSpan(text, matchedStr);
         ttObservation = {
           status: "recorded",
@@ -145,19 +166,22 @@ export class MockExtractionProvider implements ExtractionProvider {
           },
         };
       } else {
-        const dateWordsMatch = text.match(/(\d{1,2})\s*(?:October|Oct|November|Nov|December|Dec|January|Jan)/i);
+        const dateWordsMatch = text.match(
+          /(\d{1,2})\s*(January|Jan|February|Feb|March|Mar|April|Apr|May|June|Jun|July|Jul|August|Aug|September|Sept|Sep|October|Oct|November|Nov|December|Dec)\b/i
+        );
         if (dateWordsMatch) {
           const span = getCodePointSpan(text, dateWordsMatch[0]!);
-          // Normalized ISO date for October 2026
-          const day = dateWordsMatch[1]!.padStart(2, "0");
-          followUpObservation = {
-            status: "recorded",
-            date: `2026-10-${day}`,
-            source: {
-              type: "transcript",
-              span,
-            },
-          };
+          const iso = resolveDayMonth(Number(dateWordsMatch[1]), dateWordsMatch[2]!, input.visitAt);
+          if (iso) {
+            followUpObservation = {
+              status: "recorded",
+              date: iso,
+              source: { type: "transcript", span },
+            };
+          } else {
+            followUpObservation = { status: "unknown" };
+            issues.push({ field: "followUpDate", code: "AMBIGUOUS_DATE", clarificationKey: "ASK_FOLLOWUP_DATE" });
+          }
         }
       }
     }

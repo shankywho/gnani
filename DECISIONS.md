@@ -25,3 +25,13 @@ This file records all assumptions and decisions made during the autonomous execu
 - F-6 Scorer: TT mention was a substring match (violated "never fuzzy"); now exact after trim/lowercase/space-collapse. Hb normalization now strict (`9`≡`9.0`≡`9.00`).
 - F-7 Test files share one DB → `fileParallelism: false` in `apps/api/vitest.config.ts`.
 - Known, not fixed: extraction route does not pass visit history to the extractor (anti-copy check exists but is unused end to end); proposal store is in-memory; evaluation tables live in the public schema (no FK to visit tables) rather than a separate Postgres schema.
+
+## Audit pass 2 — fixes
+- F-8 Pagination: Prisma cursors are inclusive, so every page repeated the previous page's last item (beneficiaries, history, review queue). Added `skip: 1`, stable secondary ordering, and unknown/foreign cursors now return 400.
+- F-9 History endpoint returned full revisions including transcripts and notes; now returns `{id, label:"previous_visit", visitAt, visitTimezone, observations}` only. The extraction route now passes the last 5 approved readings to the extractor so the anti-copy check is live.
+- F-10 Mock extractor: `27/10` was read as BP 27/10 (now abstains); every month name mapped to October (now real month, year rolls over); a long TT phrase exceeded the 120-code-point schema limit and degraded the whole proposal (now bounded); TT is the short phrase `TT ka <dose> injection|dose|teeka`; "TT ... nahi" negation allows words in between.
+- F-11 Read-back no longer speaks free transcript text for TT (advice-injection channel); it says "TT dose mentioned."
+- F-12 Corpus: removed the "Heldout case N:" prefix from held-out transcripts; replaced three duplicate dev scenarios with the spec-required categories (injection, silence/garbage, Devanagari digits + code-mixing). Clean-condition mock result is 116/120 correct; the 4 misses are real mock limits (Devanagari digits, "lab report me X aya" correction, "Sirf Hb test hua aur X aya"), left as honest failures, not tuned away.
+- F-13 `scenarioSeed(base, id, condition)` added: one raw seed for every case would give every transcript the same dropout pattern. `run.ts` (Johny) must use it.
+- F-14 `DATABASE_URL` is required in production (no silent fallback to the test DB).
+- Accepted, documented: proposals are in memory (a restart means re-extract); evaluation tables are in the public schema with no FK to visit tables rather than a separate Postgres schema; no CSRF check on requests without a session cookie (header-only fixture auth cannot be driven by a browser cross-site).

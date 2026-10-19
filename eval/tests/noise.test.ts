@@ -1,3 +1,4 @@
+import { scenarioSeed } from "../src/noise.js";
 import { describe, it, expect } from "vitest";
 import { applyNoise, createMulberry32 } from "../src/noise.js";
 
@@ -40,5 +41,11 @@ describe("Phase 7 Noise Unit Tests (§14)", () => {
       expect(val).toBeGreaterThanOrEqual(0);
       expect(val).toBeLessThan(1);
     }
+  });
+
+  it("scenarioSeed is deterministic and differs per scenario and condition", () => {
+    expect(scenarioSeed(42, "A", "noise-a")).toBe(scenarioSeed(42, "A", "noise-a"));
+    expect(scenarioSeed(42, "A", "noise-a")).not.toBe(scenarioSeed(42, "B", "noise-a"));
+    expect(scenarioSeed(42, "A", "noise-a")).not.toBe(scenarioSeed(42, "A", "noise-b"));
   });
 });

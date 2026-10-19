@@ -33,7 +33,8 @@ describe("readback: template generation", () => {
     const text = generateReadback(obs);
     expect(text).toContain("BP 120 by 80 mmHg.");
     expect(text).toContain("Hemoglobin 9.5 g/dL.");
-    expect(text).toContain("TT dose: Second dose completed.");
+    expect(text).toContain("TT dose mentioned.");
+    expect(text).not.toContain("Second dose completed");
     expect(text).toContain("Follow-up on 2026-10-27.");
 
     // Critical safety: readback must never include freeform note/transcript text

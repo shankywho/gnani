@@ -81,4 +81,32 @@ describe("Audit hardening regressions", () => {
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe("STALE_REVISION");
   });
+  it("pagination does not repeat items and a bad cursor is a 400", async () => {
+    const all = await request(app).get("/api/v1/beneficiaries?limit=50").set("x-fixture-actor-id", WORKER_A);
+    expect(all.status).toBe(200);
+    const total = all.body.beneficiaries.length;
+    expect(total).toBeGreaterThan(1);
+    const seen: string[] = [];
+    let cursor: string | undefined;
+    for (let i = 0; i < total + 2; i++) {
+      const r = await request(app).get(`/api/v1/beneficiaries?limit=1${cursor ? `&cursor=${cursor}` : ""}`).set("x-fixture-actor-id", WORKER_A);
+      seen.push(...r.body.beneficiaries.map((b: any) => b.id));
+      cursor = r.body.nextCursor;
+      if (!cursor) break;
+    }
+    expect(seen.length).toBe(total);
+    expect(new Set(seen).size).toBe(total);
+    const bad = await request(app).get(`/api/v1/beneficiaries?cursor=${crypto.randomUUID()}`).set("x-fixture-actor-id", WORKER_A);
+    expect(bad.status).toBe(400);
+  });
+
+  it("history exposes typed observations only (no transcript, note or revisions)", async () => {
+    const ctx = await context();
+    const r = await request(app).get(`/api/v1/beneficiaries/${SYN_0001}/history?contextId=${ctx}`).set("x-fixture-actor-id", WORKER_A);
+    expect(r.status).toBe(200);
+    expect(r.body.visits.length).toBeGreaterThan(0);
+    for (const v of r.body.visits) {
+      expect(Object.keys(v).sort()).toEqual(["id", "label", "observations", "visitAt", "visitTimezone"]);
+    }
+  });
 });

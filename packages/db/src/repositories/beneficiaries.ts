@@ -1,4 +1,17 @@
 import { PrismaClient, Beneficiary } from "@prisma/client";
+import { AppError } from "@sakhiline/contracts";
+
+/** Unknown/foreign cursors make Prisma throw P2025; surface that as a client error, not a 500. */
+export async function findPage<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (err) {
+    if ((err as { code?: string })?.code === "P2025") {
+      throw new AppError("VALIDATION", "Invalid cursor");
+    }
+    throw err;
+  }
+}
 
 export async function listAssignedBeneficiaries(
   prisma: PrismaClient,
@@ -11,7 +24,14 @@ export async function listAssignedBeneficiaries(
 ): Promise<{ beneficiaries: Beneficiary[]; nextCursor?: string }> {
   const take = Math.min(Math.max(scope.limit || 50, 1), 50);
 
-  const assignments = await prisma.assignment.findMany({
+  if (scope.cursor) {
+    const ok = await prisma.assignment.count({
+      where: { id: scope.cursor, organizationId: scope.organizationId, workerId: scope.workerId, active: true },
+    });
+    if (!ok) throw new AppError("VALIDATION", "Invalid cursor");
+  }
+
+  const assignments = await findPage(() => prisma.assignment.findMany({
     where: {
       organizationId: scope.organizationId,
       workerId: scope.workerId,
@@ -21,9 +41,10 @@ export async function listAssignedBeneficiaries(
       beneficiary: true,
     },
     take: take + 1,
-    cursor: scope.cursor ? { id: scope.cursor } : undefined,
+    // Prisma cursors are inclusive: skip the cursor row or page N+1 repeats page N's last item.
+    ...(scope.cursor ? { cursor: { id: scope.cursor }, skip: 1 } : {}),
     orderBy: { id: "asc" },
-  });
+  }));
 
   const hasMore = assignments.length > take;
   const sliced = hasMore ? assignments.slice(0, take) : assignments;

@@ -1,3 +1,14 @@
+import { createHash } from "node:crypto";
+
+/**
+ * Per-case seed derived from the run seed, scenario and condition. Using one raw seed for every
+ * case would apply the same dropout pattern to every transcript and correlate noise-a with noise-b.
+ */
+export function scenarioSeed(baseSeed: number, scenarioId: string, condition: string): number {
+  const h = createHash("sha256").update(`${baseSeed}:${scenarioId}:${condition}`).digest();
+  return h.readUInt32BE(0);
+}
+
 /**
  * Deterministic seeded pseudorandom number generator (Mulberry32).
  */
