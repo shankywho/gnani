@@ -1,13 +1,15 @@
 # HANDOFF — Shanky Lane
 
-## Current Phase: Phase 6 Complete (Extraction & Proposals)
-- `apps/api`:
-  - `src/extraction/`: `prompt.md`, `provider.ts`, `httpStub.ts`, `mock.ts`, `validate.ts`, `clarifications.ts`, `index.ts`.
-  - `src/routes/extractions.ts`: `POST /visits/:id/extractions` (clip staging + cleanup), `POST /visits/:id/proposals/:pid/accept` (stale revision safety).
-  - Tests: 7 extraction unit tests (§14) + Integrations #8 (late proposal 409), #9 (full voice lifecycle), #11 (provider failure 504 + cleanup) passing (40 passing tests in api suite).
+## Current Phase: Phase 7 Complete (Scorer + Corpus)
+- `eval`:
+  - `fixtures/manifest.json`: 30 hand-authored scenarios (20 dev / 10 heldout), zero split leakage.
+  - `src/`: `types.ts`, `noise.ts`, `scorer.ts`, `aggregate.ts`, `manifest.ts`.
+  - `tests/`: 15 unit tests passing (worked example, nearest-rank latency, noise determinism, canonical matching).
+  - `docs/evaluation/`: `methods.md`, `results.md` ("No results yet — run not executed").
+- `tests/integration/evaluation.integration.test.ts`: Integration #10 passed (persistence verified, clinical tables untouched, zero HTTP triggers -> 404).
 
 ## Next Phase
-- Phase 7: Scorer + Corpus (`eval/fixtures/`, `eval/src/`, `eval/tests/`, Integration #10).
+- Phase 8: Hardening & Documentation (`tests/security/`, `tests/unit/logCapture.test.ts`, `tests/load/fixture/`, E2E skeletons, documentation updates, `workspace-requirements.md`, `BUILD_SUMMARY_SHANKY.md`).
 
 ## Needs from Johny / Workspace Requirements
 - Root package workspace should include `packages/contracts`, `packages/db`, `apps/api`, `eval`.

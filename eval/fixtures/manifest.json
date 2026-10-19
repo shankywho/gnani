@@ -1,0 +1,470 @@
+{
+  "version": "1.0.0",
+  "scorerVersion": "1.0.0",
+  "seed": 42,
+  "conditions": ["clean", "noise-a", "noise-b"],
+  "scenarios": [
+    {
+      "id": "SYN-DEV-01",
+      "split": "dev",
+      "transcript": "Sunita ka BP 110 by 70 tha, Hb 9.5 mila, TT ka doosra dose lag gaya, agla checkup 2026-10-27 ko hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 110, "diastolic": 70, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "9.5", "unit": "g/dL" },
+        "ttDose": { "status": "recorded", "text": "TT ka doosra dose" },
+        "followUpDate": { "status": "recorded", "date": "2026-10-27" }
+      },
+      "tags": ["standard", "all_fields"]
+    },
+    {
+      "id": "SYN-DEV-02",
+      "split": "dev",
+      "transcript": "Aaj BP nahi liya machine kharab thi, Hb 10 tha, TT ka pehla dose laga.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_measured" },
+        "hemoglobin": { "status": "recorded", "value": "10.0", "unit": "g/dL" },
+        "ttDose": { "status": "recorded", "text": "TT ka pehla dose" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["negation", "bp_not_measured"]
+    },
+    {
+      "id": "SYN-DEV-03",
+      "split": "dev",
+      "transcript": "BP 120/80 check kiya, agle hafte aana dobara.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 120, "diastolic": 80, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "unknown" }
+      },
+      "tags": ["ambiguous_date"]
+    },
+    {
+      "id": "SYN-DEV-04",
+      "split": "dev",
+      "transcript": "Pehle BP 130/90 laga lekin dobara check kiya to 120 by 80 tha.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 120, "diastolic": 80, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["correction", "bp"]
+    },
+    {
+      "id": "SYN-DEV-05",
+      "split": "dev",
+      "transcript": "Pichli baar Hb 8 tha, aaj check karne par Hb 9.0 aya hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [
+        {
+          "observations": {
+            "hemoglobin": { "status": "recorded", "value": "8.0", "unit": "g/dL" }
+          }
+        }
+      ],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "recorded", "value": "9.0", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["history_distinction", "hb"]
+    },
+    {
+      "id": "SYN-DEV-06",
+      "split": "dev",
+      "transcript": "Sirf blood pressure napwaya, BP 118/76 aya hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 118, "diastolic": 76, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["single_field", "bp"]
+    },
+    {
+      "id": "SYN-DEV-07",
+      "split": "dev",
+      "transcript": "BP 115 by 75 tha, TT nahi lagwaya abhi tak.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 115, "diastolic": 75, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_measured" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["negation", "tt"]
+    },
+    {
+      "id": "SYN-DEV-08",
+      "split": "dev",
+      "transcript": "BP 140/90 mila, Hb 8.5 tha, turant doctor ko dikhana hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 140, "diastolic": 90, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "8.5", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["high_vitals"]
+    },
+    {
+      "id": "SYN-DEV-09",
+      "split": "dev",
+      "transcript": "Agla visit 2026-11-05 ko tay kiya hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "recorded", "date": "2026-11-05" }
+      },
+      "tags": ["iso_date"]
+    },
+    {
+      "id": "SYN-DEV-10",
+      "split": "dev",
+      "transcript": "BP 120/80 hai, khoon ki janch nahi hui yani Hb nahi liya.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 120, "diastolic": 80, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_measured" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["negation", "hb"]
+    },
+    {
+      "id": "SYN-DEV-11",
+      "split": "dev",
+      "transcript": "BP 110 by 70 tha, 25 October ko dubara aana.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 110, "diastolic": 70, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "recorded", "date": "2026-10-25" }
+      },
+      "tags": ["natural_date"]
+    },
+    {
+      "id": "SYN-DEV-12",
+      "split": "dev",
+      "transcript": "BP 112/74, Hb 10.2 mila, TT ka doosra injection de diya.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 112, "diastolic": 74, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "10.2", "unit": "g/dL" },
+        "ttDose": { "status": "recorded", "text": "TT ka doosra injection" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["multi_field"]
+    },
+    {
+      "id": "SYN-DEV-13",
+      "split": "dev",
+      "transcript": "Aaj BP nahi liya aur Hb nahi check kiya gaya.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_measured" },
+        "hemoglobin": { "status": "not_measured" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["multi_negation"]
+    },
+    {
+      "id": "SYN-DEV-14",
+      "split": "dev",
+      "transcript": "BP 122 by 82 mila, Hb 11 tha.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 122, "diastolic": 82, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "11.0", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["integer_hb"]
+    },
+    {
+      "id": "SYN-DEV-15",
+      "split": "dev",
+      "transcript": "Blood pressure 120 by 80 tha, baki sab theek hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 120, "diastolic": 80, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["plain_bp"]
+    },
+    {
+      "id": "SYN-DEV-16",
+      "split": "dev",
+      "transcript": "Hb 9.0 tha, TT ka pehla injection lagaya.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "recorded", "value": "9.0", "unit": "g/dL" },
+        "ttDose": { "status": "recorded", "text": "TT ka pehla injection" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["hb_tt"]
+    },
+    {
+      "id": "SYN-DEV-17",
+      "split": "dev",
+      "transcript": "BP 125/85, do hafte baad checkup hoga.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 125, "diastolic": 85, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "unknown" }
+      },
+      "tags": ["relative_weeks"]
+    },
+    {
+      "id": "SYN-DEV-18",
+      "split": "dev",
+      "transcript": "TT ka pehla dose de diya gaya hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "recorded", "text": "TT ka pehla dose" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["single_tt"]
+    },
+    {
+      "id": "SYN-DEV-19",
+      "split": "dev",
+      "transcript": "BP 116/78 mila, Hb 10.5 tha.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 116, "diastolic": 78, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "10.5", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["bp_hb"]
+    },
+    {
+      "id": "SYN-DEV-20",
+      "split": "dev",
+      "transcript": "BP 120 by 80 mila, Hb 10.0 tha, TT ka doosra teeka lagaya, agla checkup 2026-11-01 ko.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 120, "diastolic": 80, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "10.0", "unit": "g/dL" },
+        "ttDose": { "status": "recorded", "text": "TT ka doosra teeka" },
+        "followUpDate": { "status": "recorded", "date": "2026-11-01" }
+      },
+      "tags": ["full_panel"]
+    },
+    {
+      "id": "SYN-HELDOUT-01",
+      "split": "heldout",
+      "transcript": "Heldout case 1: BP 124 by 84 napwaya, Hb 9.8 tha, TT ka doosra dose lagaya, agla checkup 2026-10-30.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 124, "diastolic": 84, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "9.8", "unit": "g/dL" },
+        "ttDose": { "status": "recorded", "text": "TT ka doosra dose" },
+        "followUpDate": { "status": "recorded", "date": "2026-10-30" }
+      },
+      "tags": ["heldout", "full"]
+    },
+    {
+      "id": "SYN-HELDOUT-02",
+      "split": "heldout",
+      "transcript": "Heldout case 2: Aaj BP nahi liya aur TT teeka bhi nahi lagwaya.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_measured" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_measured" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "negation"]
+    },
+    {
+      "id": "SYN-HELDOUT-03",
+      "split": "heldout",
+      "transcript": "Heldout case 3: Pehle Hb 9.0 bola tha lekin lab report me 10.5 aya hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "recorded", "value": "10.5", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "correction"]
+    },
+    {
+      "id": "SYN-HELDOUT-04",
+      "split": "heldout",
+      "transcript": "Heldout case 4: BP 118/76 tha, agle hafte dobara visit schedule karenge.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 118, "diastolic": 76, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "unknown" }
+      },
+      "tags": ["heldout", "ambiguous_date"]
+    },
+    {
+      "id": "SYN-HELDOUT-05",
+      "split": "heldout",
+      "transcript": "Heldout case 5: Pichle mahine BP 130/90 tha lekin aaj 114 by 72 hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [
+        {
+          "observations": {
+            "bloodPressure": { "status": "recorded", "systolic": 130, "diastolic": 90, "unit": "mmHg" }
+          }
+        }
+      ],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 114, "diastolic": 72, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "history_diff"]
+    },
+    {
+      "id": "SYN-HELDOUT-06",
+      "split": "heldout",
+      "transcript": "Heldout case 6: Hb 8.2 mila kamzor lag rahi hai, agla visit 2026-11-10 ko hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "recorded", "value": "8.2", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "recorded", "date": "2026-11-10" }
+      },
+      "tags": ["heldout", "anemia_date"]
+    },
+    {
+      "id": "SYN-HELDOUT-07",
+      "split": "heldout",
+      "transcript": "Heldout case 7: Sirf Hb test hua aur 10.0 aya hai.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "recorded", "value": "10.0", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "single_field"]
+    },
+    {
+      "id": "SYN-HELDOUT-08",
+      "split": "heldout",
+      "transcript": "Heldout case 8: BP 120/80 check kiya, TT ka doosra injection diya gaya.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 120, "diastolic": 80, "unit": "mmHg" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "recorded", "text": "TT ka doosra injection" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "bp_tt"]
+    },
+    {
+      "id": "SYN-HELDOUT-09",
+      "split": "heldout",
+      "transcript": "Heldout case 9: Patient ka BP 114 by 72 mila, Hb 10.8 tha.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "recorded", "systolic": 114, "diastolic": 72, "unit": "mmHg" },
+        "hemoglobin": { "status": "recorded", "value": "10.8", "unit": "g/dL" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "loanwords"]
+    },
+    {
+      "id": "SYN-HELDOUT-10",
+      "split": "heldout",
+      "transcript": "Heldout case 10: Aaj koi bhi checkup nahi hua sab kal karenge.",
+      "visitAt": "2026-10-19T10:00:00+05:30",
+      "visitTimezone": "Asia/Kolkata",
+      "history": [],
+      "expected": {
+        "bloodPressure": { "status": "not_mentioned" },
+        "hemoglobin": { "status": "not_mentioned" },
+        "ttDose": { "status": "not_mentioned" },
+        "followUpDate": { "status": "not_mentioned" }
+      },
+      "tags": ["heldout", "empty"]
+    }
+  ]
+}
