@@ -119,6 +119,7 @@ export const ErrorEnvelope = z
     requestId: z.string(),
   })
   .strict();
+export type ErrorEnvelope = z.infer<typeof ErrorEnvelope>;
 
 // Request bodies (API.md). Unknown keys rejected.
 export const ConfirmRequest = z
