@@ -1,14 +1,16 @@
 # HANDOFF — Shanky Lane
 
-## Current Phase: Phase 1 Complete (Contracts)
-- `packages/contracts`:
-  - `src/contentHash.ts`: Canonical JSON serialization + SHA-256 digest for `RevisionContent`.
-  - `src/proposal.ts`: `Proposal`, `ProposalIssue`, `ProposalModel`, `AcceptProposalRequest`, and `CLARIFICATION_TEMPLATES`.
-  - `src/index.ts`: Full barrel export for contracts.
-  - Tests: 35 passing tests (contentHash 7, errors 3, proposal 10, visit 15). Exceeds >= 28 threshold.
+## Current Phase: Phase 2 Complete (Database & Repositories)
+- `packages/db`:
+  - `docker-compose.test.yml`: Local PostgreSQL 16 on port 54320 (`sakhi`/`sakhiline_test`).
+  - `prisma/schema.prisma` & `prisma.config.ts`: Prisma 7 with `@prisma/adapter-pg`.
+  - `prisma/migrations/0001_initial/migration.sql`: Schema with hand-reviewed checks and immutability triggers on `visit_revision` and `transition_audit`.
+  - `prisma/seed.ts`: Idempotent seed (org, 4 actors, 8 beneficiaries, 8 assignments, 3 approved historical visits for SYN-0001).
+  - `src/repositories/`: `actors`, `assignments`, `beneficiaries`, `visits`, `idempotency`, `audit`, `evaluation`.
+  - Tests: Integration #1 (seed twice idempotent) and #4 (raw-SQL immutability triggers) passed against real Postgres (5/5 tests).
 
 ## Next Phase
-- Phase 2: DB (`docker-compose.test.yml`, `schema.prisma`, `prisma.config.ts`, `0001_initial/migration.sql`, `seed.ts`, repositories, integration #1 & #4).
+- Phase 3: Auth + Policy (`auth/*`, `policy/assignments.ts`, `routes/session.ts`, `routes/beneficiaries.ts`, `tests/helpers/testApp.ts`).
 
 ## Needs from Johny / Workspace Requirements
 - Root package workspace should include `packages/contracts`, `packages/db`, `apps/api`.

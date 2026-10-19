@@ -1,0 +1,190 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Organization {
+  id            String         @id @default(uuid()) @db.Uuid
+  label         String         @db.VarChar(120)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  actors        Actor[]
+  beneficiaries Beneficiary[]
+  assignments   Assignment[]
+  visits        Visit[]
+
+  @@map("organization")
+}
+
+model Actor {
+  id                    String        @id @default(uuid()) @db.Uuid
+  organizationId        String        @map("organization_id") @db.Uuid
+  issuer                String        @db.VarChar(120)
+  subject               String        @db.VarChar(120)
+  role                  String        @db.VarChar(32)
+  active                Boolean       @default(true)
+  createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  organization          Organization  @relation(fields: [organizationId], references: [id])
+  workerAssignments     Assignment[]  @relation("WorkerAssignments")
+  supervisorAssignments Assignment[]  @relation("SupervisorAssignments")
+  workerVisits          Visit[]       @relation("WorkerVisits")
+  supervisorVisits      Visit[]       @relation("SupervisorVisits")
+
+  @@unique([id, organizationId])
+  @@unique([issuer, subject])
+  @@map("actor")
+}
+
+model Beneficiary {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @map("organization_id") @db.Uuid
+  reference      String        @db.VarChar(64)
+  displayName    String        @map("display_name") @db.VarChar(120)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  assignments    Assignment[]
+  visits         Visit[]
+
+  @@unique([id, organizationId])
+  @@unique([organizationId, reference])
+  @@map("beneficiary")
+}
+
+model Assignment {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @map("organization_id") @db.Uuid
+  beneficiaryId  String        @map("beneficiary_id") @db.Uuid
+  workerId       String        @map("worker_id") @db.Uuid
+  supervisorId   String        @map("supervisor_id") @db.Uuid
+  active         Boolean       @default(true)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  beneficiary    Beneficiary   @relation(fields: [beneficiaryId, organizationId], references: [id, organizationId])
+  worker         Actor         @relation("WorkerAssignments", fields: [workerId, organizationId], references: [id, organizationId])
+  supervisor     Actor         @relation("SupervisorAssignments", fields: [supervisorId, organizationId], references: [id, organizationId])
+
+  @@index([organizationId, workerId, active])
+  @@index([organizationId, supervisorId, active])
+  @@map("assignment")
+}
+
+model Visit {
+  id                String            @id @default(uuid()) @db.Uuid
+  organizationId    String            @map("organization_id") @db.Uuid
+  beneficiaryId     String            @map("beneficiary_id") @db.Uuid
+  workerId          String            @map("worker_id") @db.Uuid
+  supervisorId      String            @map("supervisor_id") @db.Uuid
+  state             String            @default("draft") @db.VarChar(32)
+  currentRevision   Int               @default(1) @map("current_revision")
+  confirmedRevision Int?              @map("confirmed_revision")
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  organization      Organization      @relation(fields: [organizationId], references: [id])
+  beneficiary       Beneficiary       @relation(fields: [beneficiaryId, organizationId], references: [id, organizationId])
+  worker            Actor             @relation("WorkerVisits", fields: [workerId, organizationId], references: [id, organizationId])
+  supervisor        Actor             @relation("SupervisorVisits", fields: [supervisorId, organizationId], references: [id, organizationId])
+  revisions         VisitRevision[]
+  audits            TransitionAudit[]
+
+  @@unique([id, organizationId])
+  @@index([organizationId, workerId, state, updatedAt])
+  @@index([organizationId, supervisorId, state, updatedAt])
+  @@map("visit")
+}
+
+model VisitRevision {
+  visitId                String    @map("visit_id") @db.Uuid
+  revision               Int
+  visitAt                DateTime  @map("visit_at") @db.Timestamptz
+  visitTimezone          String    @map("visit_timezone") @db.VarChar(64)
+  observations           Json      @db.JsonB
+  note                   String?   @db.Text
+  transcript             String?   @db.Text
+  provenance             Json?     @db.JsonB
+  unresolvedAcknowledged Json      @default("[]") @map("unresolved_acknowledged") @db.JsonB
+  contentHash            String    @map("content_hash") @db.VarChar(64)
+  createdBy              String    @map("created_by") @db.Uuid
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  confirmedBy            String?   @map("confirmed_by") @db.Uuid
+  confirmedAt            DateTime? @map("confirmed_at") @db.Timestamptz
+
+  visit                  Visit     @relation(fields: [visitId], references: [id])
+
+  @@id([visitId, revision])
+  @@map("visit_revision")
+}
+
+model TransitionAudit {
+  id           String   @id @default(uuid()) @db.Uuid
+  visitId      String   @map("visit_id") @db.Uuid
+  revision     Int
+  actorId      String   @map("actor_id") @db.Uuid
+  fromState    String   @map("from_state") @db.VarChar(32)
+  toState      String   @map("to_state") @db.VarChar(32)
+  returnReason String?  @map("return_reason") @db.Text
+  requestId    String   @map("request_id") @db.VarChar(128)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  visit        Visit    @relation(fields: [visitId], references: [id])
+
+  @@index([visitId, createdAt])
+  @@map("transition_audit")
+}
+
+model IdempotencyRecord {
+  id             String   @id @default(uuid()) @db.Uuid
+  actorId        String   @map("actor_id") @db.Uuid
+  operation      String   @db.VarChar(64)
+  resourceKey    String   @map("resource_key") @db.VarChar(128)
+  key            String   @db.VarChar(128)
+  requestHash    String   @map("request_hash") @db.VarChar(64)
+  responseStatus Int      @map("response_status")
+  responseBody   Json     @map("response_body") @db.JsonB
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([actorId, operation, resourceKey, key])
+  @@map("idempotency_record")
+}
+
+model EvaluationRun {
+  id            String             @id @default(uuid()) @db.Uuid
+  manifestHash  String             @map("manifest_hash") @db.VarChar(64)
+  codeVersion   String             @map("code_version") @db.VarChar(64)
+  promptVersion String             @map("prompt_version") @db.VarChar(64)
+  schemaVersion String             @map("schema_version") @db.VarChar(64)
+  modelVersion  String             @map("model_version") @db.VarChar(64)
+  seed          Int
+  conditions    Json               @db.JsonB
+  counts        Json               @db.JsonB
+  status        String             @db.VarChar(32)
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  completedAt   DateTime?          @map("completed_at") @db.Timestamptz
+  results       EvaluationResult[]
+
+  @@map("evaluation_run")
+}
+
+model EvaluationResult {
+  id           String        @id @default(uuid()) @db.Uuid
+  runId        String        @map("run_id") @db.Uuid
+  scenarioId   String        @map("scenario_id") @db.VarChar(64)
+  split        String        @db.VarChar(32)
+  condition    String        @db.VarChar(32)
+  expected     Json          @db.JsonB
+  predicted    Json          @db.JsonB
+  resultClass  String        @map("result_class") @db.VarChar(32)
+  denominators Json          @db.JsonB
+  latencyMs    Int           @map("latency_ms")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  run          EvaluationRun @relation(fields: [runId], references: [id])
+
+  @@unique([runId, scenarioId, condition])
+  @@map("evaluation_result")
+}

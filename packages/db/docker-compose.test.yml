@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sakhiline_postgres_test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sakhi
+      POSTGRES_PASSWORD: sakhi
+      POSTGRES_DB: sakhiline_test
+    ports:
+      - "54320:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sakhi -d sakhiline_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
