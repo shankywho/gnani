@@ -244,7 +244,8 @@ BEGIN
     RAISE EXCEPTION 'visit_revision content columns are immutable';
   END IF;
 
-  IF OLD.confirmed_by IS NOT NULL AND (OLD.confirmed_by != NEW.confirmed_by OR OLD.confirmed_at != NEW.confirmed_at) THEN
+  -- IS DISTINCT FROM: plain != yields NULL (no raise) when NEW.* is NULL, which would let confirmation be wiped.
+  IF OLD.confirmed_by IS NOT NULL AND (OLD.confirmed_by IS DISTINCT FROM NEW.confirmed_by OR OLD.confirmed_at IS DISTINCT FROM NEW.confirmed_at) THEN
     RAISE EXCEPTION 'visit_revision confirmation metadata cannot be modified once set';
   END IF;
 
@@ -256,6 +257,18 @@ CREATE TRIGGER trg_visit_revision_immutable
 BEFORE UPDATE ON "visit_revision"
 FOR EACH ROW
 EXECUTE FUNCTION check_visit_revision_immutable();
+
+CREATE OR REPLACE FUNCTION forbid_visit_revision_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+  RAISE EXCEPTION 'visit_revision rows cannot be deleted';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_visit_revision_no_delete
+BEFORE DELETE ON "visit_revision"
+FOR EACH ROW
+EXECUTE FUNCTION forbid_visit_revision_delete();
 
 -- Append-only trigger on transition_audit (forbids UPDATE and DELETE)
 CREATE OR REPLACE FUNCTION forbid_transition_audit_mutation()

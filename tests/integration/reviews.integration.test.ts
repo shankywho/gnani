@@ -35,6 +35,7 @@ describe("Phase 5 Integration: Supervisor Reviews & Full Lifecycle (Integrations
 
     const createRes = await request(app)
       .post("/api/v1/visits")
+      .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
       .set("x-fixture-actor-id", WORKER_A)
       .send({
         contextId,
@@ -159,6 +160,7 @@ describe("Phase 5 Integration: Supervisor Reviews & Full Lifecycle (Integrations
       // 2. Create visit
       const createRes = await request(app)
         .post("/api/v1/visits")
+        .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
         .set("x-fixture-actor-id", WORKER_A)
         .send({
           contextId,

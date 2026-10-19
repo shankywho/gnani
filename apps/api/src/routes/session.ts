@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@sakhiline/db";
 import { AppError } from "@sakhiline/contracts";
-import { signSession, computeCsrfToken, SessionPayload } from "../auth/session.js";
+import { signSession, computeCsrfToken, SessionPayload, SESSION_TTL_MS } from "../auth/session.js";
 import { randomBytes } from "node:crypto";
 import { authEnv } from "../auth/env.js";
 
@@ -30,7 +30,7 @@ export function createSessionRouter(deps: { prisma: PrismaClient }) {
   // Local/test helper to set session cookie for fixture testing
   router.post("/fixture-login", async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (authEnv.APP_MODE === "live") {
+      if (authEnv.APP_MODE === "live" || !authEnv.FIXTURE_AUTH) {
         throw new AppError("FORBIDDEN", "Fixture login not allowed in live mode");
       }
 
@@ -57,6 +57,7 @@ export function createSessionRouter(deps: { prisma: PrismaClient }) {
         organizationId: actor.organizationId,
         role: actor.role as "worker" | "supervisor",
         csrfSecret,
+        exp: Date.now() + SESSION_TTL_MS,
       };
 
       const token = signSession(payload);
@@ -77,6 +78,12 @@ export function createSessionRouter(deps: { prisma: PrismaClient }) {
     } catch (err) {
       next(err);
     }
+  });
+
+  // Clears the cookie. Sessions are stateless and expire server-side after SESSION_TTL_MS.
+  router.post("/logout", (_req: Request, res: Response) => {
+    res.clearCookie("sakhi_session");
+    res.status(204).end();
   });
 
   return router;

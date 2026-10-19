@@ -49,7 +49,7 @@ export async function createVisit(
     beneficiaryId: string;
     visitAt: string;
     visitTimezone: string;
-    idempotencyKey?: string;
+    idempotencyKey: string;
     ctx: RequestContext;
   }
 ) {
@@ -67,6 +67,9 @@ export async function createVisit(
     visitAt: params.visitAt,
     visitTimezone: params.visitTimezone,
     idempotencyKey: params.idempotencyKey,
+    requestHash: createHash("sha256")
+      .update(JSON.stringify([params.beneficiaryId, params.visitAt, params.visitTimezone]))
+      .digest("hex"),
     requestId: params.ctx.requestId,
   });
 
@@ -227,6 +230,10 @@ export async function submitVisit(
     workerId: params.actor.id,
     visitId: params.visitId,
   });
+
+  if (params.data.revision !== params.expectedRevision) {
+    throw new AppError("STALE_REVISION", "If-Match does not match the revision in the request body.");
+  }
 
   const requestHash = createHash("sha256")
     .update(JSON.stringify(params.requestBody))

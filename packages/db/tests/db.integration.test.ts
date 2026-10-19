@@ -109,4 +109,16 @@ describe("Database Integration Tests (Real Postgres)", () => {
         VALUES (gen_random_uuid(), ${org!.id}::uuid, 'fixture', 'invalid-role-actor', 'admin')`
     ).rejects.toThrow(/actor_role_check/);
   });
+  it("revision confirmation cannot be wiped and revisions cannot be deleted", async () => {
+    const rev = await prisma.visitRevision.findFirst({ where: { confirmedBy: { not: null } } });
+    if (rev) {
+      await expect(
+        prisma.$executeRaw`UPDATE visit_revision SET confirmed_by = NULL, confirmed_at = NULL WHERE visit_id = ${rev.visitId}::uuid AND revision = ${rev.revision}`
+      ).rejects.toThrow(/confirmation metadata cannot be modified/);
+    }
+    const any = await prisma.visitRevision.findFirst();
+    await expect(
+      prisma.$executeRaw`DELETE FROM visit_revision WHERE visit_id = ${any!.visitId}::uuid AND revision = ${any!.revision}`
+    ).rejects.toThrow(/cannot be deleted/);
+  });
 });

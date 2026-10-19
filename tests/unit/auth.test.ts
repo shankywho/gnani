@@ -29,6 +29,7 @@ describe("auth: live mode rejects fixture verifier", () => {
       organizationId: "00000000-0000-0000-0000-000000000001",
       role: "worker",
       csrfSecret: "test-secret",
+      exp: Date.now() + 3600000,
     });
 
     const liveVerifier = new FixtureVerifier(fakePrisma, "live", true);
@@ -37,6 +38,18 @@ describe("auth: live mode rejects fixture verifier", () => {
       cookies: { sakhi_session: token },
     });
     expect(actor).toBeNull();
+  });
+
+  it("rejects an expired session token", async () => {
+    const { verifySession } = await import("../../apps/api/src/auth/session.js");
+    const token = signSession({
+      actorId: "00000000-0000-0000-0000-000000000010",
+      organizationId: "00000000-0000-0000-0000-000000000001",
+      role: "worker",
+      csrfSecret: "test-secret",
+      exp: Date.now() - 1000,
+    });
+    expect(verifySession(token)).toBeNull();
   });
 
   it("resolves actor in local mode with fixture header", async () => {

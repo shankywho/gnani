@@ -75,7 +75,7 @@ export function createVisitsRouter(deps: {
         throw new AppError("FORBIDDEN", "Invalid or expired identity context");
       }
 
-      const idempotencyKey = req.headers["idempotency-key"] as string | undefined;
+      const idempotencyKey = requireIdempotencyKey(req);
 
       const result = await createVisit(deps, {
         actor: req.actor,
@@ -88,7 +88,10 @@ export function createVisitsRouter(deps: {
 
       const etag = makeETag(result.visit.id, result.visit.currentRevision);
       res.setHeader("ETag", etag);
-      res.status(201).json(result);
+      if (result.isReplay) {
+        res.setHeader("Idempotent-Replay", "true");
+      }
+      res.status(result.isReplay ? 200 : 201).json(result);
     } catch (err) {
       next(err);
     }
@@ -250,6 +253,10 @@ export function createVisitsRouter(deps: {
 
       const { ReviewRequest } = await import("@sakhiline/contracts");
       const data = ReviewRequest.parse(req.body);
+
+      if (data.revision !== expectedRevision) {
+        throw new AppError("STALE_REVISION", "If-Match does not match the revision in the request body.");
+      }
 
       const { reviewVisit } = await import("../domain/visits.js");
       const result = await reviewVisit(deps, {

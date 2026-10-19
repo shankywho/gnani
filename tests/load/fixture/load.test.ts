@@ -43,6 +43,7 @@ describe("Phase 8 Fixture Load Test (§14 Integration #14)", () => {
       const createPromises = Array.from({ length: 50 }, async (_, i) => {
         const createRes = await request(app)
           .post("/api/v1/visits")
+          .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
           .set("x-fixture-actor-id", WORKER_A)
           .send({
             contextId,

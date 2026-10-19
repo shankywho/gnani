@@ -173,8 +173,7 @@ describe("Phase 7 Scorer Unit Tests (§14)", () => {
 
   it("scorer: canonical decimal matching", () => {
     // "9" should match "9.0"
-    expect(normalizeHemoglobin("9")).toBe("9.0");
-    expect(normalizeHemoglobin("9.0")).toBe("9.0");
+    expect(normalizeHemoglobin("9")).toBe(normalizeHemoglobin("9.0"));
     expect(normalizeHemoglobin("10.5")).toBe("10.5");
 
     const outcome: RunnerOutcome = {
@@ -210,5 +209,21 @@ describe("Phase 7 Scorer Unit Tests (§14)", () => {
 
     expect(dev).toHaveLength(20);
     expect(heldout).toHaveLength(10);
+  });
+
+  it("scorer: TT mention must match exactly, not as a substring", () => {
+    const exp: any = { bloodPressure: { status: "not_mentioned" }, hemoglobin: { status: "not_mentioned" }, ttDose: { status: "recorded", text: "TT ka doosra dose" }, followUpDate: { status: "not_mentioned" } };
+    const mk = (text: string): any => ({ kind: "proposal", issues: [], observations: { ...exp, ttDose: { status: "recorded", text } } });
+    const tt = (o: any) => scoreCase(exp, o).find((r) => r.field === "ttDose")!.classification;
+    expect(tt(mk("TT"))).toBe("wrong");
+    expect(tt(mk("tt ka doosra dose extra"))).toBe("wrong");
+    expect(tt(mk("  TT ka  DOOSRA dose "))).toBe("correct");
+  });
+
+  it("scorer: hemoglobin 9, 9.0 and 9.00 are equal; 9.5 vs 9.50 equal; 9.5 vs 9 not", () => {
+    expect(normalizeHemoglobin("9")).toBe(normalizeHemoglobin("9.00"));
+    expect(normalizeHemoglobin("9.50")).toBe(normalizeHemoglobin("9.5"));
+    expect(normalizeHemoglobin("9.5")).not.toBe(normalizeHemoglobin("9"));
+    expect(normalizeHemoglobin("9abc")).toBe("9abc");
   });
 });

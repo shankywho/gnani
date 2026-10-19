@@ -34,6 +34,7 @@ describe("Phase 6 Integration: Extractions & Proposals (Integrations #8, #9 voic
 
     const createRes = await request(appInstance)
       .post("/api/v1/visits")
+      .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
       .set("x-fixture-actor-id", WORKER_A)
       .send({
         contextId,
@@ -133,6 +134,7 @@ describe("Phase 6 Integration: Extractions & Proposals (Integrations #8, #9 voic
     // Step 2: Create visit
     const createRes = await request(app)
       .post("/api/v1/visits")
+      .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
       .set("x-fixture-actor-id", WORKER_A)
       .send({
         contextId,

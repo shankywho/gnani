@@ -70,6 +70,7 @@ describe("Phase 8 Log Capture Test (§11, §14 Integration #13)", () => {
       // 2. Create Visit
       const createRes = await request(app)
         .post("/api/v1/visits")
+        .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
         .set("x-fixture-actor-id", WORKER_A)
         .send({
           contextId,

@@ -34,6 +34,7 @@ describe("Phase 4 Integration: Visits, Transitions & Idempotency (Integrations #
 
     const createRes = await request(app)
       .post("/api/v1/visits")
+      .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
       .set("x-fixture-actor-id", WORKER_A)
       .send({
         contextId,
@@ -196,7 +197,7 @@ describe("Phase 4 Integration: Visits, Transitions & Idempotency (Integrations #
       const conflictRes = await request(app)
         .post(`/api/v1/visits/${visit.id}/submit`)
         .set("x-fixture-actor-id", WORKER_A)
-        .set("If-Match", `"visit:${visit.id}:1"`)
+        .set("If-Match", `"visit:${visit.id}:2"`)
         .set("Idempotency-Key", idemKey)
         .send({ revision: 2 }); // Changed body payload
 

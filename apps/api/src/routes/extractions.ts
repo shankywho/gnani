@@ -24,6 +24,8 @@ function requireIfMatch(req: Request): number {
   return rev;
 }
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
 export function createExtractionsRouter(deps: {
   transcribe: TranscribeClip;
   stageClip: StageClip;
@@ -31,7 +33,10 @@ export function createExtractionsRouter(deps: {
   prisma: PrismaClient;
 }) {
   const router = Router();
-  const proposalStore = new Map<string, Proposal>();
+  // Proposals are bound to the visit AND actor they were created for; accepting another
+  // visit's proposal would inject one beneficiary's data into another's record.
+  const PROPOSAL_CAP = 500;
+  const proposalStore = new Map<string, { proposal: Proposal; visitId: string; actorId: string }>();
 
   // POST /visits/:id/extractions
   router.post("/:id/extractions", async (req: Request, res: Response, next: NextFunction) => {
@@ -55,9 +60,16 @@ export function createExtractionsRouter(deps: {
       }
 
       // Input audio parsing (buffer or simulate from body)
-      const audioBuffer = req.body?.audio
-        ? Buffer.from(req.body.audio, "base64")
-        : Buffer.from("mock audio content", "utf8");
+      if (typeof req.body?.audio !== "string" || req.body.audio.length === 0) {
+        throw new AppError("VALIDATION", "audio (base64) is required");
+      }
+      const audioBuffer = Buffer.from(req.body.audio, "base64");
+      if (audioBuffer.length === 0) {
+        throw new AppError("VALIDATION", "audio is empty");
+      }
+      if (audioBuffer.length > MAX_UPLOAD_BYTES) {
+        throw new AppError("TOO_LARGE", "Audio exceeds the 10 MiB limit", 413);
+      }
       const mimeType = req.body?.mimeType || "audio/wav";
       const language = req.body?.language || "hi-IN";
 
@@ -93,7 +105,11 @@ export function createExtractionsRouter(deps: {
         visitTimezone: currentRev?.visitTimezone || "Asia/Kolkata",
       });
 
-      proposalStore.set(proposal.proposalId, proposal);
+      if (proposalStore.size >= PROPOSAL_CAP) {
+        const oldest = proposalStore.keys().next().value;
+        if (oldest !== undefined) proposalStore.delete(oldest);
+      }
+      proposalStore.set(proposal.proposalId, { proposal, visitId, actorId: req.actor.id });
 
       res.json({ proposal });
     } catch (err) {
@@ -111,10 +127,11 @@ export function createExtractionsRouter(deps: {
 
       const body = AcceptProposalRequest.parse(req.body);
 
-      const proposal = proposalStore.get(proposalId);
-      if (!proposal) {
+      const stored = proposalStore.get(proposalId);
+      if (!stored || stored.visitId !== visitId || stored.actorId !== req.actor.id) {
         throw new AppError("NOT_FOUND", "Proposal not found");
       }
+      const proposal = stored.proposal;
 
       const visit = await getVisit({ prisma: deps.prisma }, {
         actor: req.actor,

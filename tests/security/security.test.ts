@@ -38,6 +38,7 @@ describe("Phase 8 Security Tests (§13, §14 Integration #12)", () => {
 
     const createRes = await request(app)
       .post("/api/v1/visits")
+      .set("Idempotency-Key", `create-${crypto.randomUUID()}`)
       .set("x-fixture-actor-id", WORKER_A)
       .send({
         contextId,
@@ -67,6 +68,7 @@ describe("Phase 8 Security Tests (§13, §14 Integration #12)", () => {
       organizationId: "00000000-0000-0000-0000-000000000001",
       role: "worker",
       csrfSecret: "test-csrf-secret-4321",
+      exp: Date.now() + 3600000,
     });
 
     // Valid cookie session but invalid CSRF token

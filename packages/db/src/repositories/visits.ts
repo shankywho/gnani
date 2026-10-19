@@ -5,6 +5,13 @@ import {
   contentHash as computeContentHash,
 } from "@sakhiline/contracts";
 
+
+// Serialize all mutations of one visit: read-check-write below is only safe under this lock.
+// (pg_advisory_xact_lock releases automatically at commit/rollback.)
+async function lockVisit(tx: Prisma.TransactionClient, visitId: string) {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${visitId}, 0))`;
+}
+
 export interface AllowedActions {
   canEdit: boolean;
   canConfirm: boolean;
@@ -179,7 +186,8 @@ export async function createVisit(
     beneficiaryId: string;
     visitAt: string;
     visitTimezone: string;
-    idempotencyKey?: string;
+    idempotencyKey: string;
+    requestHash: string;
     requestId: string;
   }
 ) {
@@ -211,6 +219,27 @@ export async function createVisit(
   const hash = computeContentHash(initialContent);
 
   return prisma.$transaction(async (tx) => {
+    // Serialize on the idempotency scope so concurrent retries replay instead of colliding.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`createVisit:${params.workerId}:${params.beneficiaryId}:${params.idempotencyKey}`}, 0))`;
+
+    const existing = await tx.idempotencyRecord.findUnique({
+      where: {
+        actorId_operation_resourceKey_key: {
+          actorId: params.workerId,
+          operation: "createVisit",
+          resourceKey: params.beneficiaryId,
+          key: params.idempotencyKey,
+        },
+      },
+    });
+    if (existing) {
+      if (existing.requestHash !== params.requestHash) {
+        throw new AppError("IDEMPOTENCY_CONFLICT", "Idempotency key reused with different request payload");
+      }
+      const body = existing.responseBody as unknown as { visit: Visit; revision: VisitRevision };
+      return { visit: body.visit, revision: body.revision, isReplay: true };
+    }
+
     const visit = await tx.visit.create({
       data: {
         organizationId: params.organizationId,
@@ -246,9 +275,22 @@ export async function createVisit(
       },
     });
 
+    await tx.idempotencyRecord.create({
+      data: {
+        actorId: params.workerId,
+        operation: "createVisit",
+        resourceKey: params.beneficiaryId,
+        key: params.idempotencyKey,
+        requestHash: params.requestHash,
+        responseStatus: 201,
+        responseBody: { visit, revision } as unknown as Prisma.InputJsonValue,
+      },
+    });
+
     return {
       visit,
       revision,
+      isReplay: false,
     };
   });
 }
@@ -267,6 +309,7 @@ export async function editDraft(
   const hash = computeContentHash(params.content);
 
   return prisma.$transaction(async (tx) => {
+    await lockVisit(tx, params.visitId);
     const visit = await tx.visit.findFirst({
       where: {
         id: params.visitId,
@@ -343,6 +386,7 @@ export async function confirmRevision(
   }
 ) {
   return prisma.$transaction(async (tx) => {
+    await lockVisit(tx, params.visitId);
     const visit = await tx.visit.findFirst({
       where: {
         id: params.visitId,
@@ -433,6 +477,7 @@ export async function submitVisit(
   }
 ): Promise<{ visit: Visit; isReplay: boolean }> {
   return prisma.$transaction(async (tx) => {
+    await lockVisit(tx, params.visitId);
     // Check idempotency
     const existing = await tx.idempotencyRecord.findUnique({
       where: {
@@ -536,6 +581,7 @@ export async function reviewVisit(
   }
 ): Promise<{ visit: Visit; isReplay: boolean }> {
   return prisma.$transaction(async (tx) => {
+    await lockVisit(tx, params.visitId);
     // Check idempotency
     const existing = await tx.idempotencyRecord.findUnique({
       where: {
@@ -631,6 +677,7 @@ export async function reopenReturnedVisit(
   }
 ) {
   return prisma.$transaction(async (tx) => {
+    await lockVisit(tx, params.visitId);
     const visit = await tx.visit.findFirst({
       where: {
         id: params.visitId,

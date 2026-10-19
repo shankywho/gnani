@@ -6,7 +6,11 @@ export interface SessionPayload {
   organizationId: string;
   role: "worker" | "supervisor";
   csrfSecret: string;
+  /** Expiry, epoch milliseconds. */
+  exp: number;
 }
+
+export const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
 export function signSession(payload: SessionPayload, secret = authEnv.SESSION_SECRET): string {
   const json = JSON.stringify(payload);
@@ -31,6 +35,9 @@ export function verifySession(rawToken: string, secret = authEnv.SESSION_SECRET)
     const json = Buffer.from(dataB64, "base64url").toString("utf8");
     const parsed = JSON.parse(json) as SessionPayload;
     if (!parsed.actorId || !parsed.organizationId || !parsed.role || !parsed.csrfSecret) {
+      return null;
+    }
+    if (typeof parsed.exp !== "number" || parsed.exp <= Date.now()) {
       return null;
     }
     return parsed;

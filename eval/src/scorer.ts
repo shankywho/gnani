@@ -4,18 +4,19 @@ import { RunnerOutcome, FieldResult, EvalField } from "./types.js";
 const FIELDS: EvalField[] = ["bloodPressure", "hemoglobin", "ttDose", "followUpDate"];
 
 /**
- * Canonical hemoglobin decimal string normalization:
- * "9" -> "9.0", "9.0" -> "9.0", "10.5" -> "10.5"
+ * Canonical hemoglobin decimal string: only plain decimals are normalized
+ * ("9" == "9.0" == "9.00", "9.50" == "9.5"); anything else is returned unchanged
+ * so it can never equal a valid value.
  */
 export function normalizeHemoglobin(val: string): string {
   const trimmed = val.trim();
-  const num = parseFloat(trimmed);
-  if (Number.isNaN(num)) return trimmed;
-  // If it has no decimal part, append .0
-  if (!trimmed.includes(".")) {
-    return `${trimmed}.0`;
-  }
-  return trimmed;
+  if (!/^\d+(\.\d+)?$/.test(trimmed)) return trimmed;
+  return trimmed.includes(".") ? trimmed.replace(/0+$/, "").replace(/\.$/, "") : trimmed;
+}
+
+/** TT mention is compared exactly after trim/lowercase/whitespace-collapse; no substring matching. */
+export function normalizeText(val: string): string {
+  return val.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 export function scoreCase(
@@ -135,9 +136,9 @@ export function scoreCase(
         }
 
         if (field === "ttDose") {
-          const expText = (exp.text || "").trim().toLowerCase();
-          const predText = (pred.text || "").trim().toLowerCase();
-          if (expText === predText || predText.includes(expText) || expText.includes(predText)) {
+          const expText = normalizeText(exp.text || "");
+          const predText = normalizeText(pred.text || "");
+          if (expText === predText) {
             results.push({ field, classification: "correct", expected: exp, predicted: pred });
           } else {
             results.push({

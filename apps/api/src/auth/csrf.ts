@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "@sakhiline/contracts";
+import { timingSafeEqual } from "node:crypto";
 import { computeCsrfToken } from "./session.js";
 
 export function csrfProtection(req: Request, _res: Response, next: NextFunction): void {
@@ -21,7 +22,9 @@ export function csrfProtection(req: Request, _res: Response, next: NextFunction)
   }
 
   const expectedToken = computeCsrfToken(session.csrfSecret);
-  if (token !== expectedToken) {
+  const a = Buffer.from(token);
+  const b = Buffer.from(expectedToken);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
     return next(new AppError("FORBIDDEN", "Invalid CSRF token"));
   }
 
