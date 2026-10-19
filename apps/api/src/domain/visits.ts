@@ -30,7 +30,7 @@ export interface DomainVisitDeps {
 
 export function parseETag(etagHeader?: string): number | null {
   if (!etagHeader) return null;
-  const match = etagHeader.match(/^(?:W\/)?"?visit:[^:]+:(\d+)"?$/);
+  const match = etagHeader.match(/^(?:W\/)?"?(?:visit:)?[^:]+:(\d+)"?$/);
   if (match && match[1]) {
     return parseInt(match[1], 10);
   }

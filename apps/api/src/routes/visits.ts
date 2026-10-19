@@ -122,7 +122,9 @@ export function createVisitsRouter(deps: {
       const visitId = req.params.id as string;
       const expectedRevision = requireIfMatch(req);
 
-      const content = RevisionContent.parse(req.body);
+      const content = RevisionContent.parse(
+        req.body?.content !== undefined ? req.body.content : req.body
+      );
 
       const result = await editDraft(deps, {
         actor: req.actor,

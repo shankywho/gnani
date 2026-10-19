@@ -8,6 +8,11 @@ import { createSessionRouter } from "../src/routes/session.js";
 import { createBeneficiariesRouter } from "../src/routes/beneficiaries.js";
 import { createVisitsRouter } from "../src/routes/visits.js";
 import { createReviewsRouter } from "../src/routes/reviews.js";
+import { createExtractionsRouter } from "../src/routes/extractions.js";
+import { Extractor } from "../src/extraction/index.js";
+import { MockExtractionProvider } from "../src/extraction/mock.js";
+import { createStubStageClip, createStubTranscribe } from "./stubs.js";
+import { StageClip, TranscribeClip } from "@sakhiline/contracts";
 import { ContextStore } from "../src/auth/contextStore.js";
 import { FixtureVerifier } from "../src/auth/fixtureVerifier.js";
 
@@ -16,6 +21,9 @@ export interface TestAppDependencies {
   verifier?: IdentityVerifier;
   contextStore?: ContextStore;
   now?: () => Date;
+  transcribe?: TranscribeClip;
+  stageClip?: StageClip;
+  extraction?: Extractor;
   extraRouters?: { path: string; router: express.Router }[];
 }
 
@@ -33,6 +41,10 @@ export function createTestApp(deps: TestAppDependencies): Express {
   // CSRF protection for mutations
   app.use(csrfProtection);
 
+  const transcribe = deps.transcribe || createStubTranscribe();
+  const stageClip = deps.stageClip || createStubStageClip();
+  const extraction = deps.extraction || new Extractor(new MockExtractionProvider());
+
   // Routers
   app.use("/api/v1/session", createSessionRouter({ prisma: deps.prisma }));
   app.use(
@@ -42,6 +54,15 @@ export function createTestApp(deps: TestAppDependencies): Express {
   app.use(
     "/api/v1/visits",
     createVisitsRouter({ prisma: deps.prisma, contextStore })
+  );
+  app.use(
+    "/api/v1/visits",
+    createExtractionsRouter({
+      prisma: deps.prisma,
+      transcribe,
+      stageClip,
+      extraction,
+    })
   );
   app.use(
     "/api/v1/reviews",
@@ -60,6 +81,17 @@ export function createTestApp(deps: TestAppDependencies): Express {
 
     if (isAppError(err)) {
       res.status(err.statusCode).json(err.toEnvelope(requestId));
+      return;
+    }
+
+    if ((err as any)?.name === "ZodError") {
+      res.status(400).json({
+        error: {
+          code: "VALIDATION",
+          message: (err as Error).message,
+        },
+        requestId,
+      });
       return;
     }
 
