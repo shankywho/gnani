@@ -48,4 +48,15 @@ export class ContextStore {
 
     return true;
   }
+
+  getValid(contextId: string, actorId: string): IdentityContextRecord | null {
+    const record = this.store.get(contextId);
+    if (!record) return null;
+    if (record.actorId !== actorId) return null;
+    if (this.now().getTime() > record.expiresAt.getTime()) {
+      this.store.delete(contextId);
+      return null;
+    }
+    return record;
+  }
 }

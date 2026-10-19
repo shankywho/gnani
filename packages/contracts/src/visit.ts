@@ -129,10 +129,13 @@ export const ConfirmRequest = z
     unresolvedAcknowledged: z.array(z.string()).default([]),
   })
   .strict();
+export type ConfirmRequest = z.infer<typeof ConfirmRequest>;
 
 export const SubmitRequest = z.object({ revision: z.number().int().min(1) }).strict();
+export type SubmitRequest = z.infer<typeof SubmitRequest>;
 
 export const ReviewRequest = z.discriminatedUnion("action", [
   z.object({ action: z.literal("approve"), revision: z.number().int().min(1) }).strict(),
   z.object({ action: z.literal("return"), revision: z.number().int().min(1), reason: ReturnReason }).strict(),
 ]);
+export type ReviewRequest = z.infer<typeof ReviewRequest>;

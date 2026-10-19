@@ -6,6 +6,7 @@ import { createAuthMiddleware } from "../src/auth/identity.js";
 import { csrfProtection } from "../src/auth/csrf.js";
 import { createSessionRouter } from "../src/routes/session.js";
 import { createBeneficiariesRouter } from "../src/routes/beneficiaries.js";
+import { createVisitsRouter } from "../src/routes/visits.js";
 import { ContextStore } from "../src/auth/contextStore.js";
 import { FixtureVerifier } from "../src/auth/fixtureVerifier.js";
 
@@ -36,6 +37,10 @@ export function createTestApp(deps: TestAppDependencies): Express {
   app.use(
     "/api/v1/beneficiaries",
     createBeneficiariesRouter({ prisma: deps.prisma, contextStore })
+  );
+  app.use(
+    "/api/v1/visits",
+    createVisitsRouter({ prisma: deps.prisma, contextStore })
   );
 
   if (deps.extraRouters) {

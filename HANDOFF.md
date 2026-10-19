@@ -1,16 +1,14 @@
 # HANDOFF — Shanky Lane
 
-## Current Phase: Phase 3 Complete (Auth & Policy)
+## Current Phase: Phase 4 Complete (Domain & Visit Routes)
 - `apps/api`:
-  - `package.json`: Minimal shim `@sakhiline/api` (temporary, Johny takes ownership per A-7).
-  - `src/auth/`: `env.ts`, `session.ts` (HMAC tokens), `csrf.ts` (CSRF protection), `fixtureVerifier.ts`, `contextStore.ts` (10-min TTL).
-  - `src/policy/assignments.ts`: Deny-by-default access control functions.
-  - `src/routes/`: `session.ts`, `beneficiaries.ts`.
-  - `test-helpers/testApp.ts`: Test express app factory with request context and error envelope.
-  - Tests: 21 passing tests (policy unit 3, auth unit 4, csrf unit 4, integration #2, #3, #12 10).
+  - `src/domain/visits.ts`: Domain logic, ETag generator/parser, transition audit logging (no PHI/keys logged), transaction boundaries.
+  - `src/routes/visits.ts`: `POST /visits`, `GET /visits/:id`, `PATCH /visits/:id/draft`, `POST /visits/:id/confirm`, `POST /visits/:id/submit`.
+  - `packages/contracts`: Exported type definitions for requests (`ConfirmRequest`, `SubmitRequest`, `ReviewRequest`).
+  - Tests: Integration #4, #5, #6 passed (25 passing tests in api suite).
 
 ## Next Phase
-- Phase 4: Domain + Visit Routes (`domain/visits.ts`, `routes/visits.ts`, integration #4–#6).
+- Phase 5: Review Loop (`routes/reviews.ts`, reopen, readback, integration #7 and API-level #9 manual path).
 
 ## Needs from Johny / Workspace Requirements
 - Root package workspace should include `packages/contracts`, `packages/db`, `apps/api`.
