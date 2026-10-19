@@ -1,4 +1,5 @@
 import { ErrorCode, ErrorEnvelope } from "./visit.js";
+export { ErrorCode, ErrorEnvelope };
 
 export const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   VALIDATION: 400,
