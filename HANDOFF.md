@@ -1,17 +1,17 @@
 # HANDOFF — Shanky Lane
 
-## Current Phase: Phase 2 Complete (Database & Repositories)
-- `packages/db`:
-  - `docker-compose.test.yml`: Local PostgreSQL 16 on port 54320 (`sakhi`/`sakhiline_test`).
-  - `prisma/schema.prisma` & `prisma.config.ts`: Prisma 7 with `@prisma/adapter-pg`.
-  - `prisma/migrations/0001_initial/migration.sql`: Schema with hand-reviewed checks and immutability triggers on `visit_revision` and `transition_audit`.
-  - `prisma/seed.ts`: Idempotent seed (org, 4 actors, 8 beneficiaries, 8 assignments, 3 approved historical visits for SYN-0001).
-  - `src/repositories/`: `actors`, `assignments`, `beneficiaries`, `visits`, `idempotency`, `audit`, `evaluation`.
-  - Tests: Integration #1 (seed twice idempotent) and #4 (raw-SQL immutability triggers) passed against real Postgres (5/5 tests).
+## Current Phase: Phase 3 Complete (Auth & Policy)
+- `apps/api`:
+  - `package.json`: Minimal shim `@sakhiline/api` (temporary, Johny takes ownership per A-7).
+  - `src/auth/`: `env.ts`, `session.ts` (HMAC tokens), `csrf.ts` (CSRF protection), `fixtureVerifier.ts`, `contextStore.ts` (10-min TTL).
+  - `src/policy/assignments.ts`: Deny-by-default access control functions.
+  - `src/routes/`: `session.ts`, `beneficiaries.ts`.
+  - `test-helpers/testApp.ts`: Test express app factory with request context and error envelope.
+  - Tests: 21 passing tests (policy unit 3, auth unit 4, csrf unit 4, integration #2, #3, #12 10).
 
 ## Next Phase
-- Phase 3: Auth + Policy (`auth/*`, `policy/assignments.ts`, `routes/session.ts`, `routes/beneficiaries.ts`, `tests/helpers/testApp.ts`).
+- Phase 4: Domain + Visit Routes (`domain/visits.ts`, `routes/visits.ts`, integration #4–#6).
 
 ## Needs from Johny / Workspace Requirements
 - Root package workspace should include `packages/contracts`, `packages/db`, `apps/api`.
-- Root `.env.example`: `DATABASE_URL`, `TEST_DATABASE_URL`, `SESSION_SECRET`, `APP_MODE`, `FIXTURE_AUTH`, `CONTEXT_TTL_SECONDS`, `EXTRACTION_PROVIDER`.
+- Johny owns `apps/api/package.json`, `apps/api/src/server.ts`, root scripts and config.
