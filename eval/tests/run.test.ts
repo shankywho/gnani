@@ -16,7 +16,10 @@ describe("evaluation runner", () => {
     expect(o.correct + o.wrong + o.missing + o.abstained + o.schemaFailed + o.providerFailed).toBe(o.expectedCount);
     expect(a.failures.length).toBe(o.expectedCount - o.correct);
     expect(a.mode).toBe("FIXTURE");
-    expect(b.overall).toEqual(a.overall); // seeded noise + deterministic extractor
+    // Seeded noise + deterministic extractor: identical outcomes (timing may differ).
+    const counts = ({ latencyP50Ms, latencyP95Ms, ...rest }: typeof a.overall) => rest;
+    expect(counts(b.overall)).toEqual(counts(a.overall));
+    expect(b.failures).toEqual(a.failures);
   });
 
   it("persists results that reconcile with the summary and writes latest.json", async () => {

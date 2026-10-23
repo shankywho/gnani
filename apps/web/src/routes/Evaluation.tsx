@@ -10,11 +10,12 @@ type Run = {
   scenarioCount: number; caseCount: number; codeVersion: string; scorerVersion: string; promptVersion: string; modelVersion: string;
   overall: Summary; conditions: Record<string, Summary>; bySplit: { dev: Summary; heldout: Summary };
   failures: { scenarioId: string; condition: string; field: string; classification: string }[];
+  heard?: { scenarioId: string; transcript: string | null; sttMs: number; code?: string }[];
 };
 
-// The runner (eval/src/run.ts) writes this artifact; no run yet → empty glob → honest empty state.
-const found = import.meta.glob<Run>("../../../../eval/runs/latest.json", { eager: true, import: "default" });
-const run: Run | undefined = Object.values(found)[0];
+// The runner (eval/src/run.ts) writes these artifacts; no run yet → empty glob → honest empty state.
+const found = import.meta.glob<Run>(["../../../../eval/runs/latest-live.json", "../../../../eval/runs/latest.json"], { eager: true, import: "default" });
+const runs: Run[] = Object.values(found).sort((a) => (a.mode === "LIVE" ? -1 : 1));
 
 // Validated categorical slots 1–4 (dataviz validator: CVD/normal-vision pass on light surface).
 const SEGMENTS = [
@@ -45,17 +46,35 @@ export default function Evaluation() {
         Wrong values and failures stay in the totals.
       </p>
 
-      {!run ? (
-        <div className="notice info"><strong className="title">No results yet</strong>Run <code>npm run eval:run</code> to create the first run.</div>
-      ) : (
-        <>
+      {runs.length === 0 && <div className="notice info"><strong className="title">No results yet</strong>Run <code>npm run eval:run</code> to create the first run.</div>}
+      {runs.map((run) => <RunSection key={run.runId} run={run} />)}
+    </main>
+  );
+}
+
+function RunSection({ run }: { run: Run }) {
+  const live = run.mode === "LIVE";
+  const sttMs = run.heard?.map((h) => h.sttMs).sort((a, b) => a - b) ?? [];
+  return (
+    <section className="run" aria-label={`${run.mode} run`}>
+      <h2 className="run-title">{live ? "Live run: synthetic speech through Gnani" : "Fixture run: text only"}</h2>
           <div className="notice caveat" role="note">
-            <strong className="title">{run.mode} run: not a speech accuracy result</strong>
-            {run.label}. These numbers show how the extraction and scoring behave on {run.scenarioCount} hand-written scenarios.
-            They say nothing about how well real speech is recognised or about use in the field.
+            {live ? (
+              <>
+                <strong className="title">LIVE run: synthetic speech, not real workers</strong>
+                {run.label}. A computer voice read each of the {run.scenarioCount} scenarios aloud and Gnani transcribed it.
+                A computer voice is not a health worker in a noisy home, and some errors come from the voice itself (it reads dates like 2026-10-27 oddly).
+              </>
+            ) : (
+              <>
+                <strong className="title">FIXTURE run: not a speech accuracy result</strong>
+                {run.label}. These numbers show how the extraction and scoring behave on {run.scenarioCount} hand-written scenarios.
+                They say nothing about how well real speech is recognised or about use in the field.
+              </>
+            )}
           </div>
 
-          <h2>Field outcomes by condition</h2>
+          <h3>Field outcomes by condition</h3>
           <ul className="legend" aria-label="Legend">
             {SEGMENTS.map((g) => <li key={g.key}><span className="swatch" style={{ background: g.color }} aria-hidden="true" />{g.label}</li>)}
           </ul>
@@ -72,8 +91,8 @@ export default function Evaluation() {
             ))}
           </div>
 
-          <h2>All numbers</h2>
-          <div className="table-wrap" tabIndex={0} role="region" aria-label="All numbers, scrolls sideways">
+          <h3>All numbers</h3>
+          <div className="table-wrap" tabIndex={0} role="region" aria-label={`${run.mode} numbers, scrolls sideways`}>
             <table className="nums">
               <thead>
                 <tr><th scope="col">Condition</th><th scope="col">Fields</th><th scope="col">Correct</th><th scope="col">Wrong</th><th scope="col">Missed</th><th scope="col">Abstained</th><th scope="col">Failed</th><th scope="col">Accuracy</th><th scope="col">Coverage</th><th scope="col">Wrong rate</th></tr>
@@ -91,7 +110,7 @@ export default function Evaluation() {
           </div>
           <p className="hint">Accuracy = correct ÷ fields. Coverage = fields with any answer ÷ fields. Held-out scenarios were never used to tune the extractor.</p>
 
-          <h2>Where it went wrong</h2>
+          <h3>Where it went wrong</h3>
           <ul>
             {Object.entries(
               run.failures.reduce<Record<string, Record<string, number>>>((acc, f) => {
@@ -103,24 +122,33 @@ export default function Evaluation() {
             ))}
           </ul>
 
-          <h2>Speed</h2>
+          <h3>Speed</h3>
           <p>
-            Extraction took {run.overall.latencyP50Ms} ms at the median and {run.overall.latencyP95Ms} ms at p95 (N = {run.overall.nLatency}).
-            In this mode there is no speech recognition, so this is not the time from recording to an editable form.
+            {live ? "Speech-to-text plus extraction" : "Extraction"} took {run.overall.latencyP50Ms} ms at the median and {run.overall.latencyP95Ms} ms at p95 (N = {run.overall.nLatency}).
+            {live ? "This excludes uploading from a phone and the app's own request overhead." : "In this mode there is no speech recognition, so this is not the time from recording to an editable form."}
           </p>
 
-          <h2>Where these numbers come from</h2>
+          <h3>Where these numbers come from</h3>
           <dl className="obs prov">
             <div className="obs-row"><dt>Run</dt><dd className="mono">{run.runId}</dd></div>
             <div className="obs-row"><dt>Date</dt><dd>{new Date(run.createdAt).toLocaleString()}</dd></div>
-            <div className="obs-row"><dt>Cases</dt><dd>{run.scenarioCount} scenarios × 3 conditions = {run.caseCount}</dd></div>
+            <div className="obs-row"><dt>Cases</dt><dd>{run.scenarioCount} scenarios, {run.caseCount / run.scenarioCount} condition(s) = {run.caseCount}</dd></div>
             <div className="obs-row"><dt>Manifest</dt><dd className="mono">{run.manifestHash.slice(0, 16)}…</dd></div>
             <div className="obs-row"><dt>Code version</dt><dd className="mono">{run.codeVersion}</dd></div>
             <div className="obs-row"><dt>Extractor</dt><dd className="mono">{run.modelVersion}, prompt {run.promptVersion}</dd></div>
             <div className="obs-row"><dt>Scorer</dt><dd className="mono">v{run.scorerVersion}, seed {run.seed}</dd></div>
           </dl>
+      {live && run.heard && (
+        <>
+          <p>Gnani speech-to-text took {sttMs[Math.floor(sttMs.length / 2)]} ms at the median (max {sttMs[sttMs.length - 1]} ms, N = {sttMs.length}) for clips of a few seconds.</p>
+          <details>
+            <summary>What Gnani heard, all {run.heard.length} clips</summary>
+            <ul className="heard">
+              {run.heard.map((h) => <li key={h.scenarioId}><span className="mono">{h.scenarioId}</span> “{h.transcript ?? `failed: ${h.code}`}”</li>)}
+            </ul>
+          </details>
         </>
       )}
-    </main>
+    </section>
   );
 }

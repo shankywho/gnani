@@ -36,3 +36,13 @@ One authenticated request, synthetic audio only. Input: the worked-example sente
 ## Live check 2026-10-24: `format=transcribe` (Johny, authorized in chat)
 
 Same synthetic 8.41 s clip, second authenticated request, with `format=transcribe` (documented inverse text normalization). HTTP 200, 722 ms through the whole request. The transcript was **identical** to verbatim: `... hb nine tha ... ugly haft`. Inverse text normalization did not turn "nine" into "9" for this `en-IN` mixed clip (N=1). The option stays available as `GNANI_STT_FORMAT` (default `verbatim`), but it is not a fix. Number words have to be handled after STT (extractor or a normalisation step).
+
+## Live evaluation run 2026-10-24 (Johny, authorized in chat)
+
+`npm run eval:live`: run `903e554a`, code `e8a2876`, manifest `04b5a0b8`. The 30 manifest scenarios (clean only), each spoken by macOS `say` (voice Rishi, en_IN) into 16 kHz mono WAV, one Gnani `/stt/v3` call each (30 billed calls, serial, `en-IN`, verbatim), then the mock extractor and the exact scorer.
+
+- STT: 30/30 HTTP success. Per-clip STT p50 344 ms, max 783 ms.
+- Fields: 120 expected, 99 correct, 7 wrong, 14 missed. **82.5% accuracy, 88.3% coverage, 5.8% wrong rate.** The FIXTURE clean condition on the same scenarios scores 96.7%.
+- Main losses: follow-up date (6 missed, 2 wrong), TT mention (5 missed, 2 wrong: "dose" → "dost"), Hb (2 wrong, 2 missed).
+- Confound: the TTS voice reads ISO dates badly ("2026-10-27" → "2,026 to 1027"), so some date losses come from the synthetic voice, not from Gnani or the worker.
+- This is synthetic TTS speech, not human or field audio. Artifact: `eval/runs/latest-live.json` (includes every heard transcript and audio hash).

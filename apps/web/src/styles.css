@@ -120,3 +120,9 @@ a.button { display: inline-flex; align-items: center; text-decoration: none; }
 .nums tr.total { font-weight: 700; background: var(--surface); }
 .prov dd { word-break: break-all; }
 .notice.caveat { border-color: var(--ink); background: var(--surface); }
+.run { border-top: 2px solid var(--indigo); margin-top: 32px; padding-top: 8px; }
+.run-title { font-size: 1.35rem; }
+.run h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+.heard { font-size: 0.85rem; padding-left: 18px; }
+.heard li { margin: 4px 0; }
+details summary { cursor: pointer; font-weight: 700; color: var(--indigo); min-height: 44px; display: flex; align-items: center; }

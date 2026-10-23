@@ -18,7 +18,7 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - `STT_PROVIDER=mock` by default; live is never a silent fallback
 
 ## Open, need answers (Johny lane)
-- [ ] Live eval run: 30 clean scenarios → macOS TTS → Gnani (30 billed calls)?
+- [x] Live eval run approved and done (run `903e554a`, 82.5%)
 - [ ] Gnani API key available? Spend ceiling and retry allowance for live STT? (G1)
 - [ ] Optional TTS read-back in scope?
 - [ ] Real extraction LLM, or ship with the mock (labelled)?

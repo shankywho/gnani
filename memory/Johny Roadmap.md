@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J7
+current_phase: J8
 ---
 # Johny Roadmap
 
@@ -74,14 +74,19 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] `routes/Evaluation.tsx` (`/evaluation`, linked from sign-in, no login needed): caveat first, stacked outcome bars (validated colour-blind-safe palette), full table, dev/held-out split, failures by field, latency labelled honestly, provenance. Empty state if there's no run
 - [x] The code version uses `git describe --dirty`, so a run on uncommitted code says so
 - Edited Shanky's `eval/tsconfig.json`: `rootDir: ".."` so the runner can import the extractor
-- Not done: **live mode** (synthetic TTS audio → Gnani → extractor). 30 clean scenarios = 30 billed calls; needs approval
+- [x] **LIVE mode** (`npm run eval:live`): run `903e554a`, 30 Gnani calls, all OK, STT p50 344 ms. **82.5% accuracy / 88.3% coverage / 5.8% wrong** (vs 96.7% FIXTURE clean). Losses: dates (TTS reads ISO dates badly), TT ("dose" → "dost"), Hb. Dashboard shows both runs
 - No `GET /evaluation/runs` API exists; the dashboard reads the committed artifact instead
 
-### J7 — Hardening + CI ⏳
-- [ ] `.github/workflows/ci.yml` (install, typecheck, unit, contract, integration with a Postgres service, e2e)
-- [ ] Scan the bundle and logs for secrets, check audio cleanup, device/a11y matrix (Android Chrome)
+### J7 — Hardening + CI ✅ (2026-10-24)
+- [x] `.github/workflows/ci.yml`: Postgres 16 service → `npm ci` → migrate → typecheck → test → build → `check:secrets` → `test:e2e` (preinstalled Chrome, mock speech forced; no secrets in CI). Playwright results uploaded on failure
+- [x] `scripts/check-secrets.mjs` (`npm run check:secrets`): Gnani key pattern, private keys and non-local DB passwords in tracked files; server-only names in the web bundle. Proven to catch a planted leak
+- [x] `scripts/db-create.mjs`: dev DB creation without `docker exec` (works on CI)
+- [x] `tests/e2e/a11y.spec.ts`: axe WCAG A/AA serious+critical on 6 screens + keyboard-only sign-in/selection. Found and fixed a keyboard-inaccessible scroll region
+- [x] E2E now runs against the production build (`vite preview`), which removed a cold-start flake. 6/6 green repeatedly
+- [x] `docs/qa/device-a11y.md`: automated vs manual vs **pending** (real Android mic, screen reader, zoom, Firefox, glare, fluent reviewer)
+- CI fixes found on GitHub: dev-DB migrate went to the test DB (TEST_DATABASE_URL wins in Prisma config); the determinism test compared timing
 
-### J8 — Demo + submission (before 2026-11-10 23:59 IST)
+### J8 — Demo + submission (before 2026-11-10 23:59 IST) ⏳
 - [ ] `docs/demo/script.md` (60s story with a correction moment), `docs/demo/evidence.md` (claim → artifact)
 - [ ] Update `README.md` and `SETUP_AND_INITIALIZATION.md` to actual tested behaviour
 - [ ] Get human sign-off (G3) before any deploy, post or submission

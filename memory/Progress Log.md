@@ -5,6 +5,10 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — J7 CI/hardening ✅ + live eval
+- CI workflow on GitHub, secret scan, axe + keyboard e2e, device checklist. E2E runs on the production build.
+- **Live eval** `903e554a`: 30 synthetic TTS clips → Gnani, 82.5% accuracy (FIXTURE 96.7%). Biggest gaps: dates, "dose" → "dost", Hb words.
+
 ## 2026-10-24 — Johny — J6 eval runner + dashboard ✅
 - First FIXTURE evaluation run `9bb14a99` (code `2125044`): 88.6% accuracy / 92.5% coverage / 3.9% wrong over 360 field checks. Mock extractor, not speech.
 - `/evaluation` page live. 149 unit/integration + 3 e2e green.
