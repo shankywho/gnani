@@ -5,6 +5,12 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — J4 worker web app ✅
+- `apps/web` is live: sign-in, new visit, and the visit screen with a WAV recorder. The full worker loop works end to end in the browser against the real API (mock speech).
+- Found and fixed a stale-cache bug (ETag + 304 after confirm). Logged two API gaps for Shanky (ETag, return reason).
+- 146 tests green; typecheck and build clean.
+- Next: J5 supervisor screens + un-skip the e2e specs.
+
 ## 2026-10-24 — Johny — live Gnani smoke ✅
 - First real Gnani call: synthetic TTS clip of 8.4 s, 686 ms through the full API. Transcript: "sunita ka bp check kiya 110 by 70 hb nine tha tt ka doosra injection due hai ugly haft".
 - BP and TT correct; Hb and follow-up missed because numbers come back spelled out and the date phrase was garbled. Logged for Shanky and in `VERIFICATION.md`.

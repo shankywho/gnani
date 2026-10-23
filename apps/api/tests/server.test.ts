@@ -30,6 +30,8 @@ describe("server.ts composition (J2)", () => {
     const res = await request(app).get("/api/v1/nope").set("x-request-id", "req-test-1");
     expect(res.status).toBe(404);
     expect(res.body).toEqual({ error: { code: "NOT_FOUND", message: "Resource not found" }, requestId: "req-test-1" });
+    // Visit ETags only track revision; caching would hide confirm/submit/review changes.
+    expect(res.headers["cache-control"]).toBe("no-store");
   });
 
   it("malformed JSON is a 400 envelope, not a 500", async () => {
@@ -46,6 +48,8 @@ describe("server.ts composition (J2)", () => {
     const csrf = login.body.csrfToken as string;
 
     const session = await agent.get("/api/v1/session");
+    const again = await agent.get("/api/v1/session").set("If-None-Match", session.headers.etag ?? "*");
+    expect(again.status).toBe(200); // conditional GETs are ignored on /api
     expect(session.body.actor.role).toBe("worker");
 
     const roster = await agent.get("/api/v1/beneficiaries");

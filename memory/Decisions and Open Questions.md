@@ -26,6 +26,8 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
 
 ## Needs from Shanky (found by Johny)
+- [ ] 🐞 **Visit ETag ignores state.** `"visit:<id>:<rev>"` doesn't change on confirm/submit/review (same revision), so a conditional GET returns a stale 304. Worked around in `server.ts` (no-store, If-None-Match stripped on /api). Real fix: include state/confirmedRevision in the ETag, or don't use it for GET caching.
+- [ ] **Return reason isn't exposed.** It's stored in `transition_audit.return_reason`, but `GET /visits/:id` doesn't return it, and FR6 requires the worker to see it. Please add `latestReturnReason`; the UI already shows it when present.
 - [ ] 🗣 **Live STT spells numbers out** ("hb nine"). The mock extractor only matches digits, so Hb is lost. Either Johny turns on Gnani `format=transcribe`, or the extractor learns number words ("nine", "nau"…). Decide together.
 - [ ] 🗣 A garbled relative date ("ugly haft") came back as `not_mentioned` rather than `unknown`. Consider a softer "possible date phrase" issue, so the worker gets prompted.
 - [ ] 🐞 **Fixture identity 500s on non-UUID ids.** `routes/session.ts` fixture-login and `auth/fixtureVerifier.ts` (`x-fixture-actor-id`) both call `actor.findUnique({ where: { id } })` *before* the issuer/subject lookup. A non-UUID like `worker-a` makes Postgres throw → 500. Through the header this affects **every request** in local mode (e.g. `x-fixture-actor-id: junk`). Fix: only do the id lookup when the value is a UUID. Live mode is unaffected (it returns early).

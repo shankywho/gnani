@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J4
+current_phase: J5
 ---
 # Johny Roadmap
 
@@ -46,13 +46,19 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [ ] Next: try Gnani `format=transcribe` (writes numbers as digits). Needs one more approved call; the alternative is asking Shanky to make the extractor understand number words
 - **Decision:** the browser must record **16 kHz mono PCM WAV** (Web Audio), not MediaRecorder WebM. This is a J4 requirement.
 
-### J4 — Web app + worker screens ⏳
-- [ ] `apps/web` (React + TS + Vite), `src/router.tsx`
-- [ ] `routes/SignIn.tsx`, `routes/NewVisit.tsx` (roster, disambiguation, context, history, record/stop, manual entry), `routes/Visit.tsx` (draft, proposal accept, confirm, submit receipt, returned, approved read-only)
-- [ ] All failure states from `DESIGN.md`, keyboard/a11y, ≥44px controls, no colour-only status
-- [ ] Un-skip `tests/e2e/worker.spec.ts`
+### J4 — Web app + worker screens ✅ (2026-10-24)
+- [x] `apps/web`: React 19 + Vite 8 + react-router 7. `npm run dev:web` (port 5173, proxies `/api` to :3000); `npm run build`
+- [x] Routes, one file each, registered in `src/router.tsx`: `SignIn.tsx`, `NewVisit.tsx`, `Visit.tsx`
+- [x] `src/wav.ts`: browser records 16 kHz mono PCM16 WAV (Web Audio), with a 30s auto-stop
+- [x] Worker journey checked by hand in the browser: demo sign-in → search → duplicate-name warning → previous visits (labelled, not copied) → start visit (idempotent) → record → proposal with fixed clarification text → accept → acknowledge unclear field → confirm → submit → receipt. Mic-blocked state checked too
+- [x] Manual entry for every field with a status choice; client-side checks; edits preserved on errors; stale-revision → reload prompt
+- [x] Design: Atkinson Hyperlegible, indigo/ink, turmeric only on the Record button, statuses in words not colour, 375px mobile checked
+- [x] 🐞 Fixed in `server.ts`: visit ETags only track the revision, so the browser got a stale 304 after confirm. `/api` now sends `no-store` and ignores `If-None-Match` (2 new assertions)
+- [ ] E2E specs not un-skipped yet. Doing that with J5 (needs Playwright + a browser download); label wording already matches (Playwright matching is case-insensitive)
+- Known: microphone capture can't be tested in the in-app browser (a tone stub was used there). Needs a real Android Chrome check (J7)
+- Known: `AudioContext({sampleRate:16000})` may fail on Firefox; Chrome is the target
 
-### J5 — Supervisor screens
+### J5 — Supervisor screens ⏳
 - [ ] `routes/ReviewQueue.tsx`, `routes/ReviewVisit.tsx` (exact revision, approve/return + reason, stale 409 refresh)
 - [ ] Un-skip `tests/e2e/review.spec.ts`; full loop works end to end in the browser
 

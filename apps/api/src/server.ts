@@ -42,6 +42,14 @@ export function createApp(deps: AppDeps): Express {
     }
   });
 
+  // Authenticated, per-actor data: never cache. The visit ETag only tracks the revision, so a cached
+  // 304 would hide confirm/submit/review state changes that keep the same revision.
+  app.use("/api", (req, res, next) => {
+    delete req.headers["if-none-match"]; // never answer 304 from a stale browser copy
+    res.set("Cache-Control", "no-store");
+    next();
+  });
+
   // Audio arrives base64 in JSON: 10 MiB of audio is ~13.4 MB encoded.
   app.use(express.json({ limit: "15mb" }));
   app.use(cookieParser());
