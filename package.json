@@ -29,10 +29,11 @@
     "test:contract": "npm exec -w @sakhiline/api -- vitest run tests/contract",
     "dev:web": "npm run dev -w @sakhiline/web",
     "build": "npm run build -w @sakhiline/web",
-    "db:dev:setup": "node scripts/db-create.mjs sakhiline_dev && DATABASE_URL=$npm_package_config_devdb npm run db:migrate:test && DATABASE_URL=$npm_package_config_devdb npm run db:seed:test",
+    "db:dev:setup": "node scripts/db-create.mjs sakhiline_dev && DATABASE_URL=$npm_package_config_devdb TEST_DATABASE_URL=$npm_package_config_devdb npm run db:migrate:test && DATABASE_URL=$npm_package_config_devdb npm run db:seed:test",
     "test:e2e": "npm run db:dev:setup && playwright test",
     "eval:run": "DATABASE_URL=$npm_package_config_devdb npm run eval:run -w @sakhiline/eval --",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "eval:live": "DATABASE_URL=$npm_package_config_devdb npm run eval:live -w @sakhiline/eval --"
   },
   "config": {
     "devdb": "postgresql://sakhi:sakhi@localhost:54320/sakhiline_dev?schema=public"

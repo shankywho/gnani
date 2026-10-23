@@ -18,3 +18,6 @@ memory/.obsidian/
 # Playwright output
 test-results/
 playwright-report/
+
+# Synthetic TTS audio cache for live eval (hashes are recorded in eval/runs)
+eval/audio-cache/
