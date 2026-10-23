@@ -1,0 +1,20 @@
+{
+  "name": "sakhiline",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "workspaces": ["packages/contracts", "packages/db", "apps/api", "eval"],
+  "scripts": {
+    "postinstall": "npm exec -w @sakhiline/db -- prisma generate",
+    "db:up": "docker compose -f packages/db/docker-compose.test.yml up -d",
+    "db:down": "docker compose -f packages/db/docker-compose.test.yml down",
+    "db:migrate:test": "npm run db:migrate:test -w @sakhiline/db",
+    "db:seed:test": "npm run db:seed:test -w @sakhiline/db",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm test --workspaces --if-present",
+    "test:integration": "npm test -w @sakhiline/db && npm exec -w @sakhiline/api -- vitest run tests/integration",
+    "test:security": "npm exec -w @sakhiline/api -- vitest run tests/security",
+    "test:load:fixture": "npm exec -w @sakhiline/api -- vitest run tests/load",
+    "eval:self-test": "npm run eval:self-test -w @sakhiline/eval"
+  }
+}

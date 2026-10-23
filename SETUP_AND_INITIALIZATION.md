@@ -1,6 +1,21 @@
 # Setup and initialization
 
-Status: future implementation instructions; **not currently runnable**. First resolve G0/G1 and receive explicit implementation authorization G2 in [roadmap](IMPLEMENTATION_ROADMAP.md). No package or environment file is created in this planning run.
+Status: backend workspace runnable (J1, 2026-10-24). The web app, server entrypoint and speech adapters are not built yet. The sections after "Actual tested setup" are the original plan.
+
+## Actual tested setup
+
+Tested with Node v22.23.1 and Docker 29.4.3 on macOS.
+
+```bash
+npm ci                 # root npm workspaces; postinstall runs prisma generate
+npm run db:up          # Postgres 16 test container on localhost:54320
+npm run db:migrate:test
+npm run db:seed:test   # idempotent synthetic seed
+npm run typecheck
+npm test               # contracts 35, db 6, api 66, eval 18 = 125
+```
+
+Also available: `test:integration`, `test:security`, `test:load:fixture`, `eval:self-test`, `db:down`. Variable names are in `.env.example`; local tests default to the test DB URL. Per-package `package-lock.json` files are ignored by npm under workspaces, and the root `package-lock.json` is canonical.
 
 ## Existing prerequisites versus planned prerequisites
 

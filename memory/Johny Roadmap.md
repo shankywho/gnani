@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J1
+current_phase: J2
 ---
 # Johny Roadmap
 
@@ -14,17 +14,18 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] All green: contracts 35 + db 6 + api 66 + eval 18 = **125** (the eval self-test is 10 of those 18)
 - [ ] Open gates still need answers, see [[Decisions and Open Questions]]
 
-### J1 — Root workspace wiring ⏳
+### J1 — Root workspace wiring ✅ (2026-10-24)
+- [x] Root `package.json`: npm workspaces (contracts, db, api, eval), canonical root lockfile, `postinstall` runs `prisma generate`
+- [x] `.env.example` (names only); `.gitignore` already covered `.env*`
+- [x] Scripts: `typecheck`, `test`, `test:integration`, `test:security`, `test:load:fixture`, `eval:self-test`, `db:up/down`, `db:migrate:test`, `db:seed:test`
+- [x] `eval/package.json`: `workspace:*` → `*`, and toolchain aligned to ts ^7 / vitest ^5.0.5 / @types/node (Shanky's file, so tell him)
+- [x] Hoisting fixed root `tests/` resolution; no extra tsconfig needed (api tsconfig already includes `../../tests`)
+- [x] Clean `npm ci` → typecheck exit 0 → `npm test` 125 green, also without `DATABASE_URL` set
+- Skipped: `tsconfig.base.json` (the four package tsconfigs are Shanky's and already work; add it if they drift)
+- Skipped: the `build` script, which comes with apps/web (J4)
+- Note: the per-package `package-lock.json` files are now ignored by npm; Shanky may delete them
 
-- [ ] Root `package.json` with npm workspaces for `packages/*`, `apps/*`, `eval`, plus one lockfile
-- [ ] `tsconfig.base.json`, `.env.example` (names only), `.gitignore` update
-- [ ] All required root scripts (see [[Ownership and Seams]])
-- [ ] Fix found in J0: change `eval/package.json` `workspace:*` → `*` (Shanky's file, one-line manifest fix, so tell him)
-- [ ] Fix found in J0: root `tests/**` resolve packages from root `node_modules`, so hoisting fixes them (replaces Shanky's old `tests/node_modules` symlink)
-- [ ] Fix found in J0: `apps/api` typecheck runs clean but doesn't cover root `tests/` (errors are printed, yet exit is 0); add a root tsconfig that covers `tests/`
-- Done when: clean `npm ci && npm run typecheck && npm test` from the root
-
-### J2 — API server bootstrap
+### J2 — API server bootstrap ⏳
 - [ ] `apps/api/src/server.ts`: middleware order and router mounts from [[Ownership and Seams]]
 - [ ] `config/` (zod env), `routes/health.ts`, `observability/` (RequestContext + pino-style logger, no payloads)
 - [ ] Error middleware producing the `AppError` envelope; take over `apps/api/package.json`
