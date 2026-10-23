@@ -5,6 +5,11 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — Gnani key configured, branch pushed
+- Gnani key stored only in the local `.env` (gitignored). Each teammate needs their own `.env`; copy `.env.example`.
+- The live STT smoke (one synthetic `say`-generated WAV) was blocked pending an explicit OK for a billed call. Still pending.
+- Pushed `johny-lane` to origin so Shanky can see the vault and the bug report.
+
 ## 2026-10-24 — Johny — J3 speech + media ✅ (live smoke pending)
 - WAV staging with a real header check, a 1h crash sweep, the Gnani adapter (live + mock), and startup guards.
 - 146 tests green, including 16 new contract and media tests and an end-to-end WAV → proposal test. No real Gnani call made.

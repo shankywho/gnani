@@ -41,7 +41,8 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] `server.ts`: `STT_PROVIDER=mock|gnani`. Gnani without a key → startup error; `APP_MODE=live` with mock → startup error; `/health` reports `stt`
 - [x] Tests: `tests/contract/gnani.test.ts` (10), `tests/unit/media.test.ts` (6), plus an end-to-end real-WAV → proposal test in `server.test.ts`. Full suite **146 green**. New script `npm run test:contract`
 - [x] `docs/source/VERIFICATION.md` rechecked on 2026-10-24
-- [ ] ⏸ Live smoke: waiting on a Gnani key and spend approval
+- [x] Key is in the local `.env` (gitignored, mode 0600; never in git, the vault or logs). `npm run dev:api` loads it with `--env-file-if-exists`
+- [ ] ⏸ Live smoke: the key is ready, but a billed call needs Johny's explicit go-ahead (the auto-mode permission check blocked it on 2026-10-24)
 - **Decision:** the browser must record **16 kHz mono PCM WAV** (Web Audio), not MediaRecorder WebM. This is a J4 requirement.
 
 ### J4 — Web app + worker screens ⏳
