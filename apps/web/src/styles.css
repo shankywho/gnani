@@ -101,3 +101,22 @@ a.button { display: inline-flex; align-items: center; text-decoration: none; }
 .queue a { font-weight: 700; color: var(--indigo); }
 .who:is(a) { color: var(--indigo); }
 .panel h3 { font-size: 1rem; margin: 16px 0 6px; }
+.shell.wide { max-width: 760px; }
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 0; margin: 8px 0 12px; font-size: 0.9rem; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.bars { display: grid; gap: 14px; }
+.bar-label { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+.bar { display: flex; gap: 2px; height: 22px; }
+.seg { min-width: 4px; }
+.seg:first-child { border-radius: 4px 0 0 4px; }
+.seg:last-child { border-radius: 0 4px 4px 0; }
+.seg:only-child { border-radius: 4px; }
+.table-wrap { overflow-x: auto; }
+.nums { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.nums th, .nums td { padding: 8px 10px; text-align: right; border-top: 1px solid var(--line); white-space: nowrap; }
+.nums thead th { color: var(--muted); font-weight: 700; border-top: none; border-bottom: 2px solid var(--line); }
+.nums th[scope="row"], .nums thead th:first-child { text-align: left; }
+.nums tr.total { font-weight: 700; background: var(--surface); }
+.prov dd { word-break: break-all; }
+.notice.caveat { border-color: var(--ink); background: var(--surface); }

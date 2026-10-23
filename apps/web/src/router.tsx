@@ -4,6 +4,7 @@ import NewVisit from "./routes/NewVisit";
 import Visit from "./routes/Visit";
 import ReviewQueue from "./routes/ReviewQueue";
 import ReviewVisit from "./routes/ReviewVisit";
+import Evaluation from "./routes/Evaluation";
 
 // One screen = one route file (October canvas rule, CLAUDE.md).
 export const router = createBrowserRouter([
@@ -13,4 +14,5 @@ export const router = createBrowserRouter([
   { path: "/visits/:visitId", element: <Visit /> },
   { path: "/review", element: <ReviewQueue /> },
   { path: "/review/:visitId", element: <ReviewVisit /> },
+  { path: "/evaluation", element: <Evaluation /> },
 ]);

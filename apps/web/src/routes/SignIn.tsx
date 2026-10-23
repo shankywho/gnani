@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { fixtureLogin, loadSession } from "../api";
 
 // Synthetic seed accounts. Fixture sign-in only works when the API runs with APP_MODE=local.
@@ -57,6 +57,7 @@ export default function SignIn() {
           </div>
         </>
       )}
+      <p style={{ marginTop: 32 }}><Link to="/evaluation">See the synthetic evaluation results</Link></p>
     </main>
   );
 }

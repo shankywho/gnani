@@ -30,7 +30,8 @@
     "dev:web": "npm run dev -w @sakhiline/web",
     "build": "npm run build -w @sakhiline/web",
     "db:dev:setup": "(docker exec sakhiline_postgres_test psql -U sakhi -d postgres -tAc \"SELECT 1 FROM pg_database WHERE datname='sakhiline_dev'\" | grep -q 1 || docker exec sakhiline_postgres_test psql -U sakhi -d postgres -c 'CREATE DATABASE sakhiline_dev') && DATABASE_URL=$npm_package_config_devdb npm run db:migrate:test && DATABASE_URL=$npm_package_config_devdb npm run db:seed:test",
-    "test:e2e": "npm run db:dev:setup && playwright test"
+    "test:e2e": "npm run db:dev:setup && playwright test",
+    "eval:run": "DATABASE_URL=$npm_package_config_devdb npm run eval:run -w @sakhiline/eval --"
   },
   "config": {
     "devdb": "postgresql://sakhi:sakhi@localhost:54320/sakhiline_dev?schema=public"
