@@ -85,6 +85,7 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] E2E now runs against the production build (`vite preview`), which removed a cold-start flake. 6/6 green repeatedly
 - [x] `docs/qa/device-a11y.md`: automated vs manual vs **pending** (real Android mic, screen reader, zoom, Firefox, glare, fluent reviewer)
 - CI fixes found on GitHub: dev-DB migrate went to the test DB (TEST_DATABASE_URL wins in Prisma config); the determinism test compared timing
+- [x] **CI fully green on GitHub** (run 40023101276, rerun) incl. e2e. Shanky's integration/load tests are timing-flaky on 2 vCPU (logged)
 
 ### J8 — Demo + submission (before 2026-11-10 23:59 IST) ⏳
 - [ ] `docs/demo/script.md` (60s story with a correction moment), `docs/demo/evidence.md` (claim → artifact)

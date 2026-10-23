@@ -27,6 +27,7 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
 
 ## Needs from Shanky (found by Johny)
+- [ ] ⚠️ **Flaky on CI (2-vCPU runner):** `extractions.integration.test.ts` #8/#9 hit the 5s vitest timeout, and `load.test.ts` #14 gets "Unable to start a transaction in the given time" (connection pool vs 250 concurrent). Green on rerun (run 40023101276). Suggest a longer `testTimeout` for integration and a bounded pool/`maxWait` for the load test. I did not change your tests.
 - [ ] `GET /evaluation/runs` (spec §10) doesn't exist. Not blocking: the dashboard reads `eval/runs/latest.json`. I also set `rootDir: ".."` in your `eval/tsconfig.json`.
 - [ ] 🔴 **No worker visit list.** There's no `GET /visits` for workers (e.g. `?state=returned|draft|submitted`), so returned visits can't be found from the UI (FR6). Please add it; Johny will add a "My visits" route.
 - [ ] I edited your e2e specs to match the real screens: added the "Start visit" click and the unclear-field acknowledgement, and replaced the empty-BP-input check with the status select. I also deleted `tests/e2e/playwright.d.ts`.
