@@ -73,7 +73,7 @@ export default function Evaluation() {
           </div>
 
           <h2>All numbers</h2>
-          <div className="table-wrap">
+          <div className="table-wrap" tabIndex={0} role="region" aria-label="All numbers, scrolls sideways">
             <table className="nums">
               <thead>
                 <tr><th scope="col">Condition</th><th scope="col">Fields</th><th scope="col">Correct</th><th scope="col">Wrong</th><th scope="col">Missed</th><th scope="col">Abstained</th><th scope="col">Failed</th><th scope="col">Accuracy</th><th scope="col">Coverage</th><th scope="col">Wrong rate</th></tr>

@@ -19,6 +19,7 @@ export default defineConfig({
     { name: "worker", testMatch: "worker.spec.ts" },
     { name: "review", testMatch: "review.spec.ts", dependencies: ["worker"] },
     { name: "correction", testMatch: "correction.spec.ts" },
+    { name: "a11y", testMatch: "a11y.spec.ts" },
   ],
   webServer: [
     {
@@ -27,9 +28,11 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     {
-      command: `API_PORT=${API_PORT} npm run dev -w @sakhiline/web -- --port ${WEB_PORT} --strictPort`,
+      // Production build via `vite preview`: no dev-server dependency re-optimisation reloads mid-test.
+      command: `npm run build -w @sakhiline/web && API_PORT=${API_PORT} npm run preview -w @sakhiline/web -- --port ${WEB_PORT} --strictPort`,
       url: `http://localhost:${WEB_PORT}`,
       reuseExistingServer: false,
+      timeout: 120_000,
     },
   ],
 });

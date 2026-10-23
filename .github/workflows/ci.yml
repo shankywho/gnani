@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sakhi
+          POSTGRES_PASSWORD: sakhi
+          POSTGRES_DB: sakhiline_test
+        ports: ["54320:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sakhi -d sakhiline_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Synthetic local-only credentials; no real secrets are used in CI.
+      TEST_DATABASE_URL: postgresql://sakhi:sakhi@localhost:54320/sakhiline_test
+      APP_MODE: local
+      STT_PROVIDER: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run db:migrate:test
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:secrets
+      # E2E uses the runner's preinstalled Google Chrome (fake microphone); speech is forced to mock.
+      - run: google-chrome --version
+      - run: npm run test:e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7
