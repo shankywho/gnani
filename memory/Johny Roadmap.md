@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J2
+current_phase: J3
 ---
 # Johny Roadmap
 
@@ -25,13 +25,16 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - Skipped: the `build` script, which comes with apps/web (J4)
 - Note: the per-package `package-lock.json` files are now ignored by npm; Shanky may delete them
 
-### J2 — API server bootstrap ⏳
-- [ ] `apps/api/src/server.ts`: middleware order and router mounts from [[Ownership and Seams]]
-- [ ] `config/` (zod env), `routes/health.ts`, `observability/` (RequestContext + pino-style logger, no payloads)
-- [ ] Error middleware producing the `AppError` envelope; take over `apps/api/package.json`
-- Done when: a supertest smoke passes (health → session → beneficiaries) using the fixture verifier
+### J2 — API server bootstrap ✅ (2026-10-24)
+- [x] `apps/api/src/server.ts`: `createApp(deps)` + listens when run directly (`npm run dev:api` / `start:api`, PORT default 3000)
+- [x] Middleware order: `/health` (DB `SELECT 1`, no auth) → json 15mb (base64 audio) → cookies → access log → auth → CSRF → 5 routers → `/api` 404 → error envelope
+- [x] Error middleware: `AppError` envelope; ZodError or bad JSON → 400 `VALIDATION`; body too large → 413; anything else → 500 `INTERNAL`, logged by error class only
+- [x] Access log: one line per request (method, route, status, role, ms), with no bodies, cookies or queries
+- [x] `EXTRACTION_PROVIDER=mock|http` picks the extraction provider; the speech adapters are placeholders, so extraction answers 502 until J3
+- [x] `apps/api/tests/server.test.ts` (4 tests); full suite **129 green**; manual curl smoke against a running server passed
+- Skipped: separate `config/`, `routes/health.ts` and `observability/` files. The env is already parsed by Shanky's `authEnv`/`dbEnv`, and the request context is created inside his auth middleware. Split them out if they grow.
 
-### J3 — Speech + media (Gnani)
+### J3 — Speech + media (Gnani) ⏳
 - [ ] `media/`: `stageClip` (check real MIME/duration server-side, ≤30s/10MiB, convert if needed) + `cleanup.ts`
 - [ ] `providers/gnani.ts`: `TranscribeClip` with a mock mode and a live mode (30s timeout, ≤1 retry)
 - [ ] `tests/contract/gnani.test.ts` (ok/invalid media/malformed/auth-quota/timeout), `tests/unit/media.test.ts`

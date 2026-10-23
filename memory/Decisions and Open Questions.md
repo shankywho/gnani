@@ -20,3 +20,8 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - [ ] Browser recorder format vs Gnani-supported formats: is conversion needed (ffmpeg)?
 - [ ] Hosting/deploy approved at all, or local demo only?
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
+
+## Needs from Shanky (found by Johny)
+- [ ] 🐞 **Fixture identity 500s on non-UUID ids.** `routes/session.ts` fixture-login and `auth/fixtureVerifier.ts` (`x-fixture-actor-id`) both call `actor.findUnique({ where: { id } })` *before* the issuer/subject lookup. A non-UUID like `worker-a` makes Postgres throw → 500. Through the header this affects **every request** in local mode (e.g. `x-fixture-actor-id: junk`). Fix: only do the id lookup when the value is a UUID. Live mode is unaffected (it returns early).
+- [ ] `ErrorCode` has no `INTERNAL`. `server.ts` sends `code: "INTERNAL"` for 500s, so please add it to the contracts enum.
+- [ ] Per-package `package-lock.json` files are unused now that the root workspace exists; fine to delete.

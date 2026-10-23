@@ -5,6 +5,12 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — J2 API server ✅
+- `apps/api/src/server.ts` is live: health, all five of Shanky's routers, CSRF, error envelope, access log. Run with `npm run dev:api`.
+- Tests: new `apps/api/tests/server.test.ts` (health, 404 envelope, bad JSON → 400, login → roster → CSRF), and the full suite is 129 green. A curl smoke against the running server passed.
+- 🐞 Found a bug in Shanky's lane: fixture identity 500s on non-UUID ids. Logged under "Needs from Shanky" in [[Decisions and Open Questions]].
+- Next: J3 speech/media adapters.
+
 ## 2026-10-24 — Johny — J1 root workspace ✅
 - Root npm workspace + lockfile, `.env.example`, all required root scripts, plus a tested-setup section in `SETUP_AND_INITIALIZATION.md`.
 - 📣 **Shanky:** I edited `eval/package.json` (changed `workspace:*` to `*` because npm rejects pnpm syntax, and aligned ts/vitest/@types/node). Your per-package lockfiles are now unused.
