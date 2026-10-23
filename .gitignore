@@ -11,3 +11,6 @@ coverage/
 .gemini/settings.json
 .codex/config.toml
 .codex/hooks.json
+
+# Obsidian per-user workspace state
+memory/.obsidian/
