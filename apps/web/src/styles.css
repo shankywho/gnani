@@ -93,3 +93,11 @@ label { display: block; font-weight: 700; margin: 12px 0 4px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 button .hint { color: inherit; opacity: 0.85; }
 a.button { display: inline-flex; align-items: center; text-decoration: none; }
+.queue { width: 100%; border-collapse: collapse; margin-top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.queue th { text-align: left; font-size: 0.85rem; color: var(--muted); padding: 10px 12px; border-bottom: 2px solid var(--line); }
+.queue td { padding: 12px; border-top: 1px solid var(--line); vertical-align: top; }
+.queue tbody tr { cursor: pointer; }
+.queue tbody tr:hover { background: var(--paper); }
+.queue a { font-weight: 700; color: var(--indigo); }
+.who:is(a) { color: var(--indigo); }
+.panel h3 { font-size: 1rem; margin: 16px 0 6px; }

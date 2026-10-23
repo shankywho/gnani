@@ -2,12 +2,10 @@ import { test, expect } from "@playwright/test";
 
 /**
  * End-to-End specification for Supervisor Review Journey per DESIGN.md and SAKHILINE_BUILD.md §14.
- * Marked test.skip until Johny's UI routes in apps/web are implemented.
+ * Un-skipped by Johny (J5, 2026-10-24); depends on the worker project having submitted a visit.
  * Real backend concurrency and review race contracts are validated in tests/integration/reviews.integration.test.ts (Integration #7).
  */
 test.describe("Supervisor Journey E2E Flow", () => {
-  test.skip(true, "awaiting Johny's UI");
-
   test("queue -> snapshot inspection -> approve / return with reason", async ({ page }) => {
     // 1. Sign in as Supervisor A
     await page.goto("/sign-in");

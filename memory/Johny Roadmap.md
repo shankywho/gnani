@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J5
+current_phase: J6
 ---
 # Johny Roadmap
 
@@ -58,11 +58,16 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - Known: microphone capture can't be tested in the in-app browser (a tone stub was used there). Needs a real Android Chrome check (J7)
 - Known: `AudioContext({sampleRate:16000})` may fail on Firefox; Chrome is the target
 
-### J5 — Supervisor screens ⏳
-- [ ] `routes/ReviewQueue.tsx`, `routes/ReviewVisit.tsx` (exact revision, approve/return + reason, stale 409 refresh)
-- [ ] Un-skip `tests/e2e/review.spec.ts`; full loop works end to end in the browser
+### J5 — Supervisor screens + E2E ✅ (2026-10-24)
+- [x] `routes/ReviewQueue.tsx` (table, paging, empty/error states, no risk ranking) and `routes/ReviewVisit.tsx` (exact-version snapshot, transcript, approve, return with reason, stale-409 reload, idempotency key per action+version)
+- [x] **E2E switched on** with Playwright 1.64 (`npm run test:e2e`): `worker.spec.ts`, `review.spec.ts` (Shanky's, un-skipped with small step fixes) + new `correction.spec.ts` (return → reopen → re-confirm → resubmit → approve). **3/3 green, 3 runs in a row**
+- [x] E2E uses its own servers on ports 3100/5174 with `STT_PROVIDER=mock` forced (it can never bill Gnani), and runs in **system Chrome** (the bundled headless shell has no audio capture), so it exercises the real WAV recorder through Chrome's fake microphone
+- [x] 🐞 Fixed: the "recording too short" check counted timer ticks (flaky); it now measures the WAV bytes
+- [x] Separate **dev DB** `sakhiline_dev` (`npm run db:dev:setup`); `dev:api` uses it, so tests no longer pollute the demo queue
+- [x] Removed Shanky's `tests/e2e/playwright.d.ts` shim (the real types are installed now)
+- Gap: workers have **no list of their visits**, so a returned visit can only be reached by URL. Needs an API from Shanky (logged)
 
-### J6 — Eval runner + dashboard
+### J6 — Eval runner + dashboard ⏳
 - [ ] `eval/src/run.ts`: load manifest → noise via `scenarioSeed(manifest.seed, scenario.id, condition)` → pipeline → `scoreCase` → `aggregateResults` → persist with `createEvaluationRun` / `recordEvaluationResult`
 - [ ] `routes/Evaluation.tsx`: labelled "Synthetic robustness evaluation", `FIXTURE` mode label, a no-results state
 - [ ] Never write sample numbers into `docs/evaluation/results.md`

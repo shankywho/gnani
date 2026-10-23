@@ -5,6 +5,11 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — J5 supervisor + E2E ✅
+- Review queue and review screens. Playwright E2E is switched on: 3 specs green across 3 runs, using the real recorder through Chrome's fake mic and mock speech.
+- Fixed a flaky recording-length check. Added a separate dev DB so tests don't pollute the demo.
+- Found a missing worker visit list (logged for Shanky).
+
 ## 2026-10-24 — Johny — J4 worker web app ✅
 - `apps/web` is live: sign-in, new visit, and the visit screen with a WAV recorder. The full worker loop works end to end in the browser against the real API (mock speech).
 - Found and fixed a stale-cache bug (ETag + 304 after confirm). Logged two API gaps for Shanky (ETag, return reason).

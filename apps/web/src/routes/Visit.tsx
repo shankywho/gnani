@@ -274,11 +274,11 @@ function Recorder({ disabled, sttMode, onClip, onError, onStart }: { disabled: b
   async function stop() {
     const r = rec.current;
     rec.current = null;
-    const took = seconds ?? 0;
     setSeconds(null);
     if (!r) return;
     const wav = await r.stop();
-    if (took < 1) return onError("That recording was too short. Hold on a little longer before pressing Stop.");
+    // Measure the audio itself (16 kHz mono PCM16 = 32000 bytes/s), not timer ticks.
+    if ((wav.size - 44) / 32000 < 0.5) return onError("That recording was too short. Hold on a little longer before pressing Stop.");
     onClip(wav);
   }
 

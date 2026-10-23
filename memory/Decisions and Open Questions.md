@@ -26,6 +26,8 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
 
 ## Needs from Shanky (found by Johny)
+- [ ] 🔴 **No worker visit list.** There's no `GET /visits` for workers (e.g. `?state=returned|draft|submitted`), so returned visits can't be found from the UI (FR6). Please add it; Johny will add a "My visits" route.
+- [ ] I edited your e2e specs to match the real screens: added the "Start visit" click and the unclear-field acknowledgement, and replaced the empty-BP-input check with the status select. I also deleted `tests/e2e/playwright.d.ts`.
 - [ ] 🐞 **Visit ETag ignores state.** `"visit:<id>:<rev>"` doesn't change on confirm/submit/review (same revision), so a conditional GET returns a stale 304. Worked around in `server.ts` (no-store, If-None-Match stripped on /api). Real fix: include state/confirmedRevision in the ETag, or don't use it for GET caching.
 - [ ] **Return reason isn't exposed.** It's stored in `transition_audit.return_reason`, but `GET /visits/:id` doesn't return it, and FR6 requires the worker to see it. Please add `latestReturnReason`; the UI already shows it when present.
 - [ ] 🗣 **Live STT spells numbers out** ("hb nine"). The mock extractor only matches digits, so Hb is lost. Either Johny turns on Gnani `format=transcribe`, or the extractor learns number words ("nine", "nau"…). Decide together.

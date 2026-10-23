@@ -14,3 +14,7 @@ coverage/
 
 # Obsidian per-user workspace state
 memory/.obsidian/
+
+# Playwright output
+test-results/
+playwright-report/
