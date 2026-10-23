@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J6
+current_phase: J7
 ---
 # Johny Roadmap
 
@@ -67,12 +67,17 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] Removed Shanky's `tests/e2e/playwright.d.ts` shim (the real types are installed now)
 - Gap: workers have **no list of their visits**, so a returned visit can only be reached by URL. Needs an API from Shanky (logged)
 
-### J6 — Eval runner + dashboard ⏳
-- [ ] `eval/src/run.ts`: load manifest → noise via `scenarioSeed(manifest.seed, scenario.id, condition)` → pipeline → `scoreCase` → `aggregateResults` → persist with `createEvaluationRun` / `recordEvaluationResult`
-- [ ] `routes/Evaluation.tsx`: labelled "Synthetic robustness evaluation", `FIXTURE` mode label, a no-results state
-- [ ] Never write sample numbers into `docs/evaluation/results.md`
+### J6 — Eval runner + dashboard ✅ (2026-10-24)
+- [x] `eval/src/run.ts` (`npm run eval:run`): manifest → `scenarioSeed` noise → real `Extractor` (mock provider) → `scoreCase` → `aggregateResults` (+ dev/held-out split) → DB (`createEvaluationRun` / `recordEvaluationResult`) → `eval/runs/<ts>-fixture.json` + `latest.json`
+- [x] **FIXTURE run** `9bb14a99`, code `2125044`, manifest `04b5a0b8`: 90 cases / 360 field checks. Clean 96.7%, noise-a 89.2%, noise-b 80.0%, overall **88.6% accuracy, 92.5% coverage, 3.9% wrong**. ⚠️ Mock extractor on text only, **not speech accuracy**
+- [x] `eval/tests/run.test.ts`: 90 cases, totals reconcile, deterministic, DB rows reconcile with the summary (eval 20/20)
+- [x] `routes/Evaluation.tsx` (`/evaluation`, linked from sign-in, no login needed): caveat first, stacked outcome bars (validated colour-blind-safe palette), full table, dev/held-out split, failures by field, latency labelled honestly, provenance. Empty state if there's no run
+- [x] The code version uses `git describe --dirty`, so a run on uncommitted code says so
+- Edited Shanky's `eval/tsconfig.json`: `rootDir: ".."` so the runner can import the extractor
+- Not done: **live mode** (synthetic TTS audio → Gnani → extractor). 30 clean scenarios = 30 billed calls; needs approval
+- No `GET /evaluation/runs` API exists; the dashboard reads the committed artifact instead
 
-### J7 — Hardening + CI
+### J7 — Hardening + CI ⏳
 - [ ] `.github/workflows/ci.yml` (install, typecheck, unit, contract, integration with a Postgres service, e2e)
 - [ ] Scan the bundle and logs for secrets, check audio cleanup, device/a11y matrix (Android Chrome)
 

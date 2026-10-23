@@ -18,6 +18,7 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - `STT_PROVIDER=mock` by default; live is never a silent fallback
 
 ## Open, need answers (Johny lane)
+- [ ] Live eval run: 30 clean scenarios → macOS TTS → Gnani (30 billed calls)?
 - [ ] Gnani API key available? Spend ceiling and retry allowance for live STT? (G1)
 - [ ] Optional TTS read-back in scope?
 - [ ] Real extraction LLM, or ship with the mock (labelled)?
@@ -26,6 +27,7 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
 
 ## Needs from Shanky (found by Johny)
+- [ ] `GET /evaluation/runs` (spec §10) doesn't exist. Not blocking: the dashboard reads `eval/runs/latest.json`. I also set `rootDir: ".."` in your `eval/tsconfig.json`.
 - [ ] 🔴 **No worker visit list.** There's no `GET /visits` for workers (e.g. `?state=returned|draft|submitted`), so returned visits can't be found from the UI (FR6). Please add it; Johny will add a "My visits" route.
 - [ ] I edited your e2e specs to match the real screens: added the "Start visit" click and the unclear-field acknowledgement, and replaced the empty-BP-input check with the status select. I also deleted `tests/e2e/playwright.d.ts`.
 - [ ] 🐞 **Visit ETag ignores state.** `"visit:<id>:<rev>"` doesn't change on confirm/submit/review (same revision), so a conditional GET returns a stale 304. Worked around in `server.ts` (no-store, If-None-Match stripped on /api). Real fix: include state/confirmedRevision in the ETag, or don't use it for GET caching.

@@ -5,6 +5,10 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — J6 eval runner + dashboard ✅
+- First FIXTURE evaluation run `9bb14a99` (code `2125044`): 88.6% accuracy / 92.5% coverage / 3.9% wrong over 360 field checks. Mock extractor, not speech.
+- `/evaluation` page live. 149 unit/integration + 3 e2e green.
+
 ## 2026-10-24 — Johny — Gnani `format=transcribe` check
 - 2nd live call: still "hb nine"; inverse text normalization didn't help. Number words need handling after STT (Shanky's extractor). The option stays as `GNANI_STT_FORMAT`.
 

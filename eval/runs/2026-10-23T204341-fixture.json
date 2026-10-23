@@ -1,0 +1,364 @@
+{
+  "runId": "9bb14a99-4f64-457c-844c-2f17c562ae44",
+  "createdAt": "2026-10-23T20:43:41.161Z",
+  "mode": "FIXTURE",
+  "label": "FIXTURE (mock extractor, transcript-level noise; no speech recognition)",
+  "persisted": true,
+  "manifestHash": "04b5a0b8993ebbbac0035e01c4c6f3748938118bccd53e7bdb2da99e0462a2e4",
+  "seed": 42,
+  "scenarioCount": 30,
+  "caseCount": 90,
+  "codeVersion": "2125044",
+  "scorerVersion": "1.0.0",
+  "manifestVersion": "1.0.0",
+  "promptVersion": "2026-10-19",
+  "modelVersion": "regex-mock-v1",
+  "overall": {
+    "expectedCount": 360,
+    "suppliedCount": 333,
+    "correct": 319,
+    "wrong": 14,
+    "missing": 27,
+    "abstained": 0,
+    "schemaFailed": 0,
+    "providerFailed": 0,
+    "accuracy": 0.8861111111111111,
+    "coverage": 0.925,
+    "wrongRate": 0.03888888888888889,
+    "latencyP50Ms": 0,
+    "latencyP95Ms": 0,
+    "nLatency": 90
+  },
+  "conditions": {
+    "clean": {
+      "expectedCount": 120,
+      "suppliedCount": 117,
+      "correct": 116,
+      "wrong": 1,
+      "missing": 3,
+      "abstained": 0,
+      "schemaFailed": 0,
+      "providerFailed": 0,
+      "accuracy": 0.9666666666666667,
+      "coverage": 0.975,
+      "wrongRate": 0.008333333333333333,
+      "latencyP50Ms": 0,
+      "latencyP95Ms": 0,
+      "nLatency": 30
+    },
+    "noise-a": {
+      "expectedCount": 120,
+      "suppliedCount": 110,
+      "correct": 107,
+      "wrong": 3,
+      "missing": 10,
+      "abstained": 0,
+      "schemaFailed": 0,
+      "providerFailed": 0,
+      "accuracy": 0.8916666666666667,
+      "coverage": 0.9166666666666666,
+      "wrongRate": 0.025,
+      "latencyP50Ms": 0,
+      "latencyP95Ms": 0,
+      "nLatency": 30
+    },
+    "noise-b": {
+      "expectedCount": 120,
+      "suppliedCount": 106,
+      "correct": 96,
+      "wrong": 10,
+      "missing": 14,
+      "abstained": 0,
+      "schemaFailed": 0,
+      "providerFailed": 0,
+      "accuracy": 0.8,
+      "coverage": 0.8833333333333333,
+      "wrongRate": 0.08333333333333333,
+      "latencyP50Ms": 0,
+      "latencyP95Ms": 0,
+      "nLatency": 30
+    }
+  },
+  "bySplit": {
+    "dev": {
+      "expectedCount": 240,
+      "suppliedCount": 221,
+      "correct": 212,
+      "wrong": 9,
+      "missing": 19,
+      "abstained": 0,
+      "schemaFailed": 0,
+      "providerFailed": 0,
+      "accuracy": 0.8833333333333333,
+      "coverage": 0.9208333333333333,
+      "wrongRate": 0.0375,
+      "latencyP50Ms": 0,
+      "latencyP95Ms": 0,
+      "nLatency": 60
+    },
+    "heldout": {
+      "expectedCount": 120,
+      "suppliedCount": 112,
+      "correct": 107,
+      "wrong": 5,
+      "missing": 8,
+      "abstained": 0,
+      "schemaFailed": 0,
+      "providerFailed": 0,
+      "accuracy": 0.8916666666666667,
+      "coverage": 0.9333333333333333,
+      "wrongRate": 0.041666666666666664,
+      "latencyP50Ms": 0,
+      "latencyP95Ms": 0,
+      "nLatency": 30
+    }
+  },
+  "failures": [
+    {
+      "scenarioId": "SYN-DEV-01",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-01",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-01",
+      "condition": "noise-b",
+      "field": "followUpDate",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-02",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-03",
+      "condition": "noise-a",
+      "field": "followUpDate",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-04",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-05",
+      "condition": "noise-b",
+      "field": "hemoglobin",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-07",
+      "condition": "noise-a",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-07",
+      "condition": "noise-a",
+      "field": "ttDose",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-07",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-08",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-12",
+      "condition": "noise-a",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-12",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-14",
+      "condition": "noise-b",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-15",
+      "condition": "noise-a",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-15",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-16",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-18",
+      "condition": "noise-a",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-18",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-19",
+      "condition": "clean",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-19",
+      "condition": "clean",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-19",
+      "condition": "noise-a",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-19",
+      "condition": "noise-a",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-19",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-19",
+      "condition": "noise-b",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-20",
+      "condition": "noise-a",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-DEV-20",
+      "condition": "noise-a",
+      "field": "ttDose",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-DEV-20",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-01",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-01",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-03",
+      "condition": "clean",
+      "field": "hemoglobin",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-03",
+      "condition": "noise-a",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-03",
+      "condition": "noise-b",
+      "field": "hemoglobin",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-04",
+      "condition": "noise-b",
+      "field": "bloodPressure",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-06",
+      "condition": "noise-b",
+      "field": "followUpDate",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-07",
+      "condition": "clean",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-07",
+      "condition": "noise-a",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-07",
+      "condition": "noise-b",
+      "field": "hemoglobin",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-08",
+      "condition": "noise-a",
+      "field": "ttDose",
+      "classification": "missing"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-08",
+      "condition": "noise-b",
+      "field": "ttDose",
+      "classification": "wrong"
+    },
+    {
+      "scenarioId": "SYN-HELDOUT-09",
+      "condition": "noise-b",
+      "field": "hemoglobin",
+      "classification": "wrong"
+    }
+  ]
+}
