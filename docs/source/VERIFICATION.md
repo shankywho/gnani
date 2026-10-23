@@ -32,3 +32,7 @@ One authenticated request, synthetic audio only. Input: the worked-example sente
 - Transcript: `sunita ka bp check kiya 110 by 70 hb nine tha tt ka doosra injection due hai ugly haft`
 - Extracted: BP 110/70 ✅ · TT recorded ✅ · Hb **not_mentioned** ❌ (Gnani wrote "nine" as a word; the extractor only matches digits) · follow-up **not_mentioned** ❌ ("agle hafte" came back as "ugly haft", so no `AMBIGUOUS_DATE` issue was raised).
 - Findings: (1) Gnani's verbatim output spells numbers out. The documented `format=transcribe` (inverse text normalization, which writes numbers as digits) may fix this but is untested. (2) A mis-transcribed time phrase silently becomes `not_mentioned` instead of `unknown`, which hides missing meaning; the worker must catch it during review. (3) This is TTS speech, not a human voice: N=1, not an accuracy measurement.
+
+## Live check 2026-10-24: `format=transcribe` (Johny, authorized in chat)
+
+Same synthetic 8.41 s clip, second authenticated request, with `format=transcribe` (documented inverse text normalization). HTTP 200, 722 ms through the whole request. The transcript was **identical** to verbatim: `... hb nine tha ... ugly haft`. Inverse text normalization did not turn "nine" into "9" for this `en-IN` mixed clip (N=1). The option stays available as `GNANI_STT_FORMAT` (default `verbatim`), but it is not a fix. Number words have to be handled after STT (extractor or a normalisation step).

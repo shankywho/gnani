@@ -30,6 +30,17 @@ describe("Gnani STT adapter contract", () => {
     const form = seen!.init.body as FormData;
     expect(form.get("audio_file")).toBeInstanceOf(Blob);
     expect(form.get("language_code")).toBe("en-IN"); // server config wins over the client hint
+    expect(form.get("format")).toBeNull(); // verbatim is Gnani's default
+  });
+
+  it("sends format=transcribe when configured (digits instead of number words)", async () => {
+    let form: FormData | undefined;
+    const fetchStub = (async (_u: string, init: RequestInit) => {
+      form = init.body as FormData;
+      return new Response(JSON.stringify({ success: true, transcript: "hb 9" }));
+    }) as unknown as typeof fetch;
+    await createGnaniTranscribe({ apiKey: "k", format: "transcribe", fetch: fetchStub })(await clip(), "en-IN");
+    expect(form!.get("format")).toBe("transcribe");
   });
 
   it.each([

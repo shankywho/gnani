@@ -5,6 +5,9 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — Gnani `format=transcribe` check
+- 2nd live call: still "hb nine"; inverse text normalization didn't help. Number words need handling after STT (Shanky's extractor). The option stays as `GNANI_STT_FORMAT`.
+
 ## 2026-10-24 — Johny — J5 supervisor + E2E ✅
 - Review queue and review screens. Playwright E2E is switched on: 3 specs green across 3 runs, using the real recorder through Chrome's fake mic and mock speech.
 - Fixed a flaky recording-length check. Added a separate dev DB so tests don't pollute the demo.

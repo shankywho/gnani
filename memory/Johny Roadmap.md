@@ -43,7 +43,7 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] `docs/source/VERIFICATION.md` rechecked on 2026-10-24
 - [x] Key is in the local `.env` (gitignored, mode 0600; never in git, the vault or logs). `npm run dev:api` loads it with `--env-file-if-exists`
 - [x] **Live smoke passed (2026-10-24):** one billed call, 686 ms end to end. BP and TT extracted; Hb ("nine" as a word) and the follow-up ("agle hafte" → "ugly haft") were missed. Details in `docs/source/VERIFICATION.md`
-- [ ] Next: try Gnani `format=transcribe` (writes numbers as digits). Needs one more approved call; the alternative is asking Shanky to make the extractor understand number words
+- [x] Tried Gnani `format=transcribe` (2nd billed call, 722 ms): **no change**, still "hb nine". The option stays as `GNANI_STT_FORMAT`, default verbatim. The fix belongs after STT (number words in the extractor)
 - **Decision:** the browser must record **16 kHz mono PCM WAV** (Web Audio), not MediaRecorder WebM. This is a J4 requirement.
 
 ### J4 — Web app + worker screens ✅ (2026-10-24)

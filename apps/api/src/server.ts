@@ -116,7 +116,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (authEnv.APP_MODE === "live" && sttMode === "mock") throw new Error("APP_MODE=live requires STT_PROVIDER=gnani");
   const transcribe =
     sttMode === "gnani"
-      ? createGnaniTranscribe({ apiKey: process.env.GNANI_API_KEY!, languageCode: process.env.GNANI_LANGUAGE_CODE })
+      ? createGnaniTranscribe({
+          apiKey: process.env.GNANI_API_KEY!,
+          languageCode: process.env.GNANI_LANGUAGE_CODE,
+          format: process.env.GNANI_STT_FORMAT === "transcribe" ? "transcribe" : "verbatim",
+        })
       : mockTranscribe;
 
   await sweepStaging();

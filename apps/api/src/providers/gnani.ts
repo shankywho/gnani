@@ -8,6 +8,8 @@ export interface GnaniOptions {
   apiKey: string;
   /** en-IN accepts English-Hindi mixed speech and returns Latin script, which the extractor expects. */
   languageCode?: string;
+  /** "transcribe" turns on Gnani's inverse text normalization (e.g. "nine" → "9"); default "verbatim". */
+  format?: "verbatim" | "transcribe";
   timeoutMs?: number;
   fetch?: typeof globalThis.fetch;
 }
@@ -25,6 +27,7 @@ export function createGnaniTranscribe(opts: GnaniOptions): TranscribeClip {
       const form = new FormData();
       form.append("audio_file", new Blob([await readFile(clip.path)], { type: clip.mimeType }), "clip.wav");
       form.append("language_code", languageCode);
+      if (opts.format === "transcribe") form.append("format", "transcribe");
       const res = await doFetch(GNANI_STT_URL, {
         method: "POST",
         headers: { "X-API-Key-ID": opts.apiKey },
