@@ -2,22 +2,26 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J0
+current_phase: J1
 ---
 # Johny Roadmap
 
 Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, its tests run, and an entry in [[Progress Log]].
 
-### J0 — Baseline check ⏳
-- [ ] Install each package (`npm install` in contracts, db, api, eval)
-- [ ] `docker compose -f packages/db/docker-compose.test.yml up -d`, `prisma migrate deploy`, seed
-- [ ] Run every package's tests and record the **real** count (125 vs 104 conflict, see [[Shanky Lane]])
-- [ ] Confirm the open gates in [[Decisions and Open Questions]] (Gnani key, spend limit)
+### J0 — Baseline check ✅ (2026-10-24)
+- [x] Installed contracts, db and api. eval **can't install standalone** (`workspace:*` is pnpm syntax)
+- [x] Test DB up on 54320, migrations applied, seeded
+- [x] All green: contracts 35 + db 6 + api 66 + eval 18 = **125** (the eval self-test is 10 of those 18)
+- [ ] Open gates still need answers, see [[Decisions and Open Questions]]
 
-### J1 — Root workspace wiring
+### J1 — Root workspace wiring ⏳
+
 - [ ] Root `package.json` with npm workspaces for `packages/*`, `apps/*`, `eval`, plus one lockfile
 - [ ] `tsconfig.base.json`, `.env.example` (names only), `.gitignore` update
 - [ ] All required root scripts (see [[Ownership and Seams]])
+- [ ] Fix found in J0: change `eval/package.json` `workspace:*` → `*` (Shanky's file, one-line manifest fix, so tell him)
+- [ ] Fix found in J0: root `tests/**` resolve packages from root `node_modules`, so hoisting fixes them (replaces Shanky's old `tests/node_modules` symlink)
+- [ ] Fix found in J0: `apps/api` typecheck runs clean but doesn't cover root `tests/` (errors are printed, yet exit is 0); add a root tsconfig that covers `tests/`
 - Done when: clean `npm ci && npm run typecheck && npm test` from the root
 
 ### J2 — API server bootstrap

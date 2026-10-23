@@ -22,6 +22,6 @@ Seed: org "Demo Org (synthetic)"; `worker-a`, `worker-b`, `sup-a`, `sup-b`; bene
 
 E2E specs `tests/e2e/worker.spec.ts` and `review.spec.ts` are `test.skip` until Johny's UI exists.
 
-⚠️ Test counts disagree: `HANDOFF.md` says 125, `BUILD_SUMMARY_SHANKY.md` says 104. Re-run in J0 to get the real number.
+✅ Verified 2026-10-24 (J0): **125 tests green** (contracts 35, db 6, api 66, eval 18). `HANDOFF.md` is right; `BUILD_SUMMARY_SHANKY.md` (104) is out of date.
 
 Backlog (optional stretch S): a live-vs-mock reconcile helper and extra non-manifest scenarios.
