@@ -13,11 +13,15 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - A-9 Proposals are cached ephemerally; a stale `baseRevision` → 409 `STALE_REVISION`
 - A-10 Scorer uses exact canonical matching; failures stay in denominators
 
+## Settled (Johny lane)
+- STT language `en-IN` (mixed English-Hindi, Latin output); configurable via `GNANI_LANGUAGE_CODE`
+- `STT_PROVIDER=mock` by default; live is never a silent fallback
+
 ## Open, need answers (Johny lane)
 - [ ] Gnani API key available? Spend ceiling and retry allowance for live STT? (G1)
 - [ ] Optional TTS read-back in scope?
 - [ ] Real extraction LLM, or ship with the mock (labelled)?
-- [ ] Browser recorder format vs Gnani-supported formats: is conversion needed (ffmpeg)?
+- [x] ~~Recorder format~~ → the browser records PCM WAV, so no ffmpeg (J3, 2026-10-24)
 - [ ] Hosting/deploy approved at all, or local demo only?
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
 

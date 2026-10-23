@@ -11,3 +11,14 @@ Retrieved 2026-10-19 by Helios. Public documentation was read; no authenticated 
 | S5 | Supplied PDF: `/Users/anshjohnson/Ganini/SakhiLine — Project Brief & Architecture.pdf` | Nine pages; page-numbered extraction in `brief-extracted.txt`. Original source retained outside repository; architecture diagram inspected on p.4. Assertions such as Evon access, latency and formats remain hypotheses unless verified independently. |
 
 No conversion between programme credits and API minutes is assumed. No specific LLM vendor or real deployment is authorized. An 8 kHz synthetic recording is not a PSTN integration, and synthetic accuracy cannot establish clinical or field performance.
+
+## Recheck 2026-10-24 (Johny, J3)
+
+Public docs only. **Still no authenticated Gnani request**: no key was configured and no spend is approved.
+
+- S2 is unchanged: `POST https://api.vachana.ai/stt/v3`, multipart `audio_file` + `language_code`, header `X-API-Key-ID`. Success: `{success, request_id, timestamp, transcript}`. Errors: `{success:false, error:{type,message}}` with 400/403/429/500/503.
+- Language: `en-IN` "accepts English-Hindi mixed audio" and outputs Latin script. We picked it (`GNANI_LANGUAGE_CODE`) for Hinglish visits because the extractor expects Latin script. Unverified against real speech.
+- Duration: the docs disagree with themselves (the endpoint description says 30s max, the schema says 60s). The app cap is 30s, so either is satisfied.
+- Format: WAV only in the app. The browser records PCM WAV, so no WebM conversion is needed. The server checks the RIFF/WAVE header and duration, not the declared MIME type.
+- Adapter `apps/api/src/providers/gnani.ts`: 30s timeout, no retries (billing). 400→UNSUPPORTED_MEDIA, 429→RATE_LIMITED, timeout→TIMEOUT, everything else→PROVIDER_FAILURE. Covered by `tests/contract/gnani.test.ts` using a stubbed fetch.
+- Pending: one authorized live smoke with a synthetic clip, once a key and a spend ceiling are approved (G1).

@@ -5,6 +5,11 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — J3 speech + media ✅ (live smoke pending)
+- WAV staging with a real header check, a 1h crash sweep, the Gnani adapter (live + mock), and startup guards.
+- 146 tests green, including 16 new contract and media tests and an end-to-end WAV → proposal test. No real Gnani call made.
+- Next: J4 web app. The recorder must output PCM WAV.
+
 ## 2026-10-24 — Johny — J2 API server ✅
 - `apps/api/src/server.ts` is live: health, all five of Shanky's routers, CSRF, error envelope, access log. Run with `npm run dev:api`.
 - Tests: new `apps/api/tests/server.test.ts` (health, 404 envelope, bad JSON → 400, login → roster → CSRF), and the full suite is 129 green. A curl smoke against the running server passed.

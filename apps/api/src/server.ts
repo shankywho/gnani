@@ -16,21 +16,17 @@ import { createExtractionsRouter } from "./routes/extractions.js";
 import { Extractor } from "./extraction/index.js";
 import { MockExtractionProvider } from "./extraction/mock.js";
 import { HttpStubExtractionProvider } from "./extraction/httpStub.js";
+import { stageClip } from "./media/stage.js";
+import { sweepStaging } from "./media/cleanup.js";
+import { createGnaniTranscribe, mockTranscribe } from "./providers/gnani.js";
 
 export interface AppDeps {
   prisma: PrismaClient;
   transcribe: TranscribeClip;
   stageClip: StageClip;
+  /** Shown on /health so the UI can label fixture speech honestly. */
+  sttMode?: "mock" | "gnani";
 }
-
-// Placeholders until the speech/media adapters land (J3): extraction answers 502, never fake text.
-const transcribeNotConfigured: TranscribeClip = async () => ({ ok: false, code: "PROVIDER_FAILURE", latencyMs: 0 });
-const stageInMemory: StageClip = async (upload) => ({
-  path: "",
-  mimeType: upload.mimeType,
-  seconds: 0,
-  cleanup: async () => {},
-});
 
 export function createApp(deps: AppDeps): Express {
   const { prisma } = deps;
@@ -40,7 +36,7 @@ export function createApp(deps: AppDeps): Express {
   app.get("/health", async (_req, res) => {
     try {
       await prisma.$queryRaw`SELECT 1`;
-      res.json({ status: "ok", mode: authEnv.APP_MODE });
+      res.json({ status: "ok", mode: authEnv.APP_MODE, stt: deps.sttMode ?? "mock" });
     } catch {
       res.status(503).json({ status: "db_unavailable" });
     }
@@ -106,6 +102,16 @@ export function createApp(deps: AppDeps): Express {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const port = Number(process.env.PORT ?? 3000);
-  const app = createApp({ prisma: getPrismaClient(), transcribe: transcribeNotConfigured, stageClip: stageInMemory });
-  app.listen(port, () => console.log(JSON.stringify({ level: "info", msg: "api listening", port, mode: authEnv.APP_MODE })));
+  const sttMode = process.env.STT_PROVIDER === "gnani" ? "gnani" : "mock";
+  if (sttMode === "gnani" && !process.env.GNANI_API_KEY) throw new Error("STT_PROVIDER=gnani requires GNANI_API_KEY");
+  // No silent fallback: live mode refuses to run on fixture speech.
+  if (authEnv.APP_MODE === "live" && sttMode === "mock") throw new Error("APP_MODE=live requires STT_PROVIDER=gnani");
+  const transcribe =
+    sttMode === "gnani"
+      ? createGnaniTranscribe({ apiKey: process.env.GNANI_API_KEY!, languageCode: process.env.GNANI_LANGUAGE_CODE })
+      : mockTranscribe;
+
+  await sweepStaging();
+  const app = createApp({ prisma: getPrismaClient(), transcribe, stageClip, sttMode });
+  app.listen(port, () => console.log(JSON.stringify({ level: "info", msg: "api listening", port, mode: authEnv.APP_MODE, stt: sttMode })));
 }

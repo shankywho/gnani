@@ -2,7 +2,7 @@
 tags: [sakhiline, johny, phase]
 owner: johny
 status: in-progress
-current_phase: J3
+current_phase: J4
 ---
 # Johny Roadmap
 
@@ -34,13 +34,17 @@ Ordered by dependency. Each phase ends with a commit `johny phase N: <title>`, i
 - [x] `apps/api/tests/server.test.ts` (4 tests); full suite **129 green**; manual curl smoke against a running server passed
 - Skipped: separate `config/`, `routes/health.ts` and `observability/` files. The env is already parsed by Shanky's `authEnv`/`dbEnv`, and the request context is created inside his auth middleware. Split them out if they grow.
 
-### J3 — Speech + media (Gnani) ⏳
-- [ ] `media/`: `stageClip` (check real MIME/duration server-side, ≤30s/10MiB, convert if needed) + `cleanup.ts`
-- [ ] `providers/gnani.ts`: `TranscribeClip` with a mock mode and a live mode (30s timeout, ≤1 retry)
-- [ ] `tests/contract/gnani.test.ts` (ok/invalid media/malformed/auth-quota/timeout), `tests/unit/media.test.ts`
-- [ ] Live smoke **only once a key and spend are approved**; record it in `docs/source/VERIFICATION.md`
+### J3 — Speech + media (Gnani) ✅ code / ⏸ live smoke (2026-10-24)
+- [x] `media/stage.ts`: WAV only, checks the RIFF header (so renamed WebM is rejected), ≤30s → 413, private 0600 files in `$TMPDIR/sakhiline-staging`, `cleanup()` unlinks
+- [x] `media/cleanup.ts`: `sweepStaging()` removes files older than 1h, run at server start (crash recovery)
+- [x] `providers/gnani.ts`: live `createGnaniTranscribe` (`en-IN`, 30s timeout, no retries) + `mockTranscribe` (labelled mock)
+- [x] `server.ts`: `STT_PROVIDER=mock|gnani`. Gnani without a key → startup error; `APP_MODE=live` with mock → startup error; `/health` reports `stt`
+- [x] Tests: `tests/contract/gnani.test.ts` (10), `tests/unit/media.test.ts` (6), plus an end-to-end real-WAV → proposal test in `server.test.ts`. Full suite **146 green**. New script `npm run test:contract`
+- [x] `docs/source/VERIFICATION.md` rechecked on 2026-10-24
+- [ ] ⏸ Live smoke: waiting on a Gnani key and spend approval
+- **Decision:** the browser must record **16 kHz mono PCM WAV** (Web Audio), not MediaRecorder WebM. This is a J4 requirement.
 
-### J4 — Web app + worker screens
+### J4 — Web app + worker screens ⏳
 - [ ] `apps/web` (React + TS + Vite), `src/router.tsx`
 - [ ] `routes/SignIn.tsx`, `routes/NewVisit.tsx` (roster, disambiguation, context, history, record/stop, manual entry), `routes/Visit.tsx` (draft, proposal accept, confirm, submit receipt, returned, approved read-only)
 - [ ] All failure states from `DESIGN.md`, keyboard/a11y, ≥44px controls, no colour-only status

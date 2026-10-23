@@ -24,6 +24,7 @@
     "test:load:fixture": "npm exec -w @sakhiline/api -- vitest run tests/load",
     "eval:self-test": "npm run eval:self-test -w @sakhiline/eval",
     "dev:api": "npm run dev -w @sakhiline/api",
-    "start:api": "npm start -w @sakhiline/api"
+    "start:api": "npm start -w @sakhiline/api",
+    "test:contract": "npm exec -w @sakhiline/api -- vitest run tests/contract"
   }
 }
