@@ -26,6 +26,8 @@ Canonical sources: the repo's `DECISIONS.md` (Shanky's A-0…A-10, plus the audi
 - [ ] Web stack confirmation: React + Vite + react-router (assumed)
 
 ## Needs from Shanky (found by Johny)
+- [ ] 🗣 **Live STT spells numbers out** ("hb nine"). The mock extractor only matches digits, so Hb is lost. Either Johny turns on Gnani `format=transcribe`, or the extractor learns number words ("nine", "nau"…). Decide together.
+- [ ] 🗣 A garbled relative date ("ugly haft") came back as `not_mentioned` rather than `unknown`. Consider a softer "possible date phrase" issue, so the worker gets prompted.
 - [ ] 🐞 **Fixture identity 500s on non-UUID ids.** `routes/session.ts` fixture-login and `auth/fixtureVerifier.ts` (`x-fixture-actor-id`) both call `actor.findUnique({ where: { id } })` *before* the issuer/subject lookup. A non-UUID like `worker-a` makes Postgres throw → 500. Through the header this affects **every request** in local mode (e.g. `x-fixture-actor-id: junk`). Fix: only do the id lookup when the value is a UUID. Live mode is unaffected (it returns early).
 - [ ] `ErrorCode` has no `INTERNAL`. `server.ts` sends `code: "INTERNAL"` for 500s, so please add it to the contracts enum.
 - [ ] Per-package `package-lock.json` files are unused now that the root workspace exists; fine to delete.

@@ -22,3 +22,13 @@ Public docs only. **Still no authenticated Gnani request**: no key was configure
 - Format: WAV only in the app. The browser records PCM WAV, so no WebM conversion is needed. The server checks the RIFF/WAVE header and duration, not the declared MIME type.
 - Adapter `apps/api/src/providers/gnani.ts`: 30s timeout, no retries (billing). 400→UNSUPPORTED_MEDIA, 429→RATE_LIMITED, timeout→TIMEOUT, everything else→PROVIDER_FAILURE. Covered by `tests/contract/gnani.test.ts` using a stubbed fetch.
 - Pending: one authorized live smoke with a synthetic clip, once a key and a spend ceiling are approved (G1).
+
+## Live smoke 2026-10-24 (Johny, authorized by the repo owner in chat)
+
+One authenticated request, synthetic audio only. Input: the worked-example sentence spoken by macOS `say` (voice Rishi, Indian English), 16 kHz mono PCM16 WAV, 8.41 s. Path: running API (`STT_PROVIDER=gnani`, `GNANI_LANGUAGE_CODE=en-IN`) → `POST /api/v1/visits/:id/extractions` → real `stageClip` → Gnani `/stt/v3` → mock regex extractor.
+
+- Result: HTTP 200, wall time **686 ms** for the whole request (STT plus extraction, local network, N=1; not a latency claim).
+- Expected: `Sunita ka BP check kiya, 110 by 70, Hb 9 tha, TT ka doosra injection due hai agle hafte.`
+- Transcript: `sunita ka bp check kiya 110 by 70 hb nine tha tt ka doosra injection due hai ugly haft`
+- Extracted: BP 110/70 ✅ · TT recorded ✅ · Hb **not_mentioned** ❌ (Gnani wrote "nine" as a word; the extractor only matches digits) · follow-up **not_mentioned** ❌ ("agle hafte" came back as "ugly haft", so no `AMBIGUOUS_DATE` issue was raised).
+- Findings: (1) Gnani's verbatim output spells numbers out. The documented `format=transcribe` (inverse text normalization, which writes numbers as digits) may fix this but is untested. (2) A mis-transcribed time phrase silently becomes `not_mentioned` instead of `unknown`, which hides missing meaning; the worker must catch it during review. (3) This is TTS speech, not a human voice: N=1, not an accuracy measurement.

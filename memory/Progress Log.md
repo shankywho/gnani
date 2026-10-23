@@ -5,6 +5,10 @@ tags: [sakhiline, log]
 
 Newest first. Format: `## YYYY-MM-DD — who — phase` then what changed, commit, tests run.
 
+## 2026-10-24 — Johny — live Gnani smoke ✅
+- First real Gnani call: synthetic TTS clip of 8.4 s, 686 ms through the full API. Transcript: "sunita ka bp check kiya 110 by 70 hb nine tha tt ka doosra injection due hai ugly haft".
+- BP and TT correct; Hb and follow-up missed because numbers come back spelled out and the date phrase was garbled. Logged for Shanky and in `VERIFICATION.md`.
+
 ## 2026-10-24 — Johny — Gnani key configured, branch pushed
 - Gnani key stored only in the local `.env` (gitignored). Each teammate needs their own `.env`; copy `.env.example`.
 - The live STT smoke (one synthetic `say`-generated WAV) was blocked pending an explicit OK for a billed call. Still pending.
